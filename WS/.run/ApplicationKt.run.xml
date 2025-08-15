@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ApplicationKt" type="JetRunConfigurationType" nameIsGenerated="true">
+    <envs>
+      <env name="-config" value="configuration/application.conf" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="com.example.ApplicationKt" />
+    <module name="ktor-sample.main" />
+    <option name="PROGRAM_PARAMETERS" value="configuration/application.conf" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

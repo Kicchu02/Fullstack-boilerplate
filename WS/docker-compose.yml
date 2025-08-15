@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:12
+    container_name: demo_app_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: Demo@123
+      POSTGRES_DB: demo
+    ports:
+      - "54321:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 5
+
+volumes:
+  pgdata:

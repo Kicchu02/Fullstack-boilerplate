@@ -18,11 +18,18 @@ export const HomePage = observer((): React.ReactElement => {
       {homePageStore.isLoading ? (
         <CircularProgress />
       ) : (
-        <Stack gap={2} alignItems="center">
-          <Typography variant="h1">{homePageStore.dummyData}</Typography>
+        <Stack
+          gap={2}
+          alignItems="center"
+          border="1px solid"
+          borderColor="divider"
+          borderRadius={2}
+          p={2}
+        >
+          <Typography variant="subtitle1">{homePageStore.dummyData}</Typography>
           <Button
-            variant="outlined"
-            size="large"
+            variant="contained"
+            color="error"
             loading={homePageStore.isSignOutLoading}
             onClick={async () => {
               await homePageStore.signOut();

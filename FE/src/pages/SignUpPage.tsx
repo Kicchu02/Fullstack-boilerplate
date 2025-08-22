@@ -44,6 +44,7 @@ export const SignUpPage = observer((): React.ReactElement => {
           helperText={
             signUpPageStore.isEmailInvalid ? "Invalid email" : undefined
           }
+          disabled={signUpPageStore.isLoading}
         />
         <TextField
           label="Password"
@@ -62,13 +63,17 @@ export const SignUpPage = observer((): React.ReactElement => {
             input: {
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword(!showPassword)}>
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={signUpPageStore.isLoading}
+                  >
                     {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                   </IconButton>
                 </InputAdornment>
               ),
             },
           }}
+          disabled={signUpPageStore.isLoading}
         />
         <Button
           variant="contained"

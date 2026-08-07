@@ -94,13 +94,29 @@ Learn more: https://skills.sh/vercel-labs/agent-skills/react-best-practices
 
 ### Step 6: Offer to Install
 
-If the user wants to proceed, you can install the skill for them:
+Never install a skill unprompted. Ask the user first, name the exact source you
+are about to pull from, and wait for them to say yes.
+
+Once they confirm, install project-level into this repo and let the CLI show its
+own confirmation prompt:
 
 ```bash
-npx skills add <owner/repo@skill> -g -y
+npx skills add <owner/repo> -s <skill> -a claude-code
 ```
 
-The `-g` flag installs globally (user-level) and `-y` skips confirmation prompts.
+`-s` picks a single skill instead of the whole repo, and `-a claude-code`
+installs it into `.claude/skills/` where Claude Code will find it. This is a
+project-level install, so the skill is scoped to this repo and shows up in the
+diff for review.
+
+Do **not** use `-g` (installs user-level, affecting every project on the
+machine) or `-y` (suppresses the CLI's own confirmation prompt). Skills are
+third-party prompt content that runs with full agent permissions — installing
+them machine-wide, unattended, is not a decision to make on the user's behalf.
+
+After installing, `skills-lock.json` records the source and content hash. Read
+the installed `SKILL.md` and tell the user what it actually instructs the agent
+to do before it gets used.
 
 ## Common Skill Categories
 

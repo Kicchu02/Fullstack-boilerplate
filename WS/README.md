@@ -4,17 +4,19 @@ A Kotlin-based web application built with Ktor framework, featuring user authent
 
 ## Prerequisites
 
+Java is managed via [mise](https://mise.jdx.dev/), pinned in the `.mise.toml` at the repo root (currently Java 25, Temurin, LTS). See the [root README](../README.md) for installing mise and running `mise install` — do that first if you haven't already.
+
 ### For Linux
 
 - Docker and Docker Compose must be installed
-- Java 17 or higher
 - Gradle (included via wrapper)
+- [IntelliJ IDEA](https://www.jetbrains.com/idea/) — this project is run from the IDE, not the command line (see [Running the Application](#running-the-application))
 
 ### For Windows
 
 - Docker Desktop must be installed and running
-- Java 17 or higher
 - Gradle (included via wrapper)
+- [IntelliJ IDEA](https://www.jetbrains.com/idea/) — this project is run from the IDE, not the command line (see [Running the Application](#running-the-application))
 
 ## Project Setup
 

@@ -4,10 +4,7 @@ This is a React + TypeScript + Vite project with routing and state management.
 
 ## Prerequisites
 
-Before running this project, ensure you have the following installed on your machine:
-
-- **Node.js** (version 16 or higher)
-- **NPM** (Node Package Manager) - comes bundled with Node.js
+Node.js and npm are managed via [mise](https://mise.jdx.dev/), pinned in the `.mise.toml` at the repo root (currently Node.js 24 LTS, with npm bundled). See the [root README](../README.md) for installing mise and running `mise install` — do that first if you haven't already.
 
 ## Installation & Setup
 

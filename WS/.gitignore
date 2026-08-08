@@ -37,3 +37,6 @@ out/
 
 ### Jooq ###
 /jooq/
+
+### Kotlin compiler daemon ###
+.kotlin/

@@ -1,15 +1,31 @@
 #!/bin/bash
+set -euo pipefail
+
+# Run from WS/ regardless of the caller's working directory, so that
+# docker-compose.yml, ./gradlew and the paths inside build.gradle.kts all resolve.
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+
+# shellcheck source=lib/preflight.sh
+source ./scripts/lib/preflight.sh
+# shellcheck source=lib/db.sh
+source ./scripts/lib/db.sh
+require_no_sudo
+require_docker
+require_java
 
 echo "🚀 Starting Docker Compose..."
 docker compose up -d
 
 echo "🛠️ Waiting for DB to be ready..."
-sleep 5
+if ! wait_for_db 60; then
+  echo "Database did not become ready in time. Check 'docker compose logs db'." >&2
+  exit 1
+fi
 
 echo "📜 Running Flyway migrations..."
-../gradlew flywayMigrate
+./gradlew flywayMigrate
 
 echo "📦 Generating Jooq code..."
-../gradlew generateJooq
+./gradlew generateJooq
 
 echo "✅ Done!"

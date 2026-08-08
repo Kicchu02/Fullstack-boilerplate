@@ -11,7 +11,10 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      # -h forces TCP. Without it pg_isready probes the unix socket, which the
+      # entrypoint's init-time temporary server answers before the real server
+      # is listening on TCP — reporting healthy too early on a fresh volume.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       retries: 5
 

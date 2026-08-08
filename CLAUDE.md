@@ -12,7 +12,11 @@ There is no shared build system between them; treat them as separate projects an
 
 ## First-time setup
 
-From repo root: `./bootstrap.sh` (or `bootstrap.bat` on Windows) starts the WS Docker DB, runs migrations/codegen, then `npm install`s the FE. Safe to re-run.
+From repo root: `./bootstrap.sh` starts the WS Docker DB, runs migrations/codegen, then `npm install`s the FE. Safe to re-run, and it exits non-zero at the first failing step.
+
+Node.js and Java are pinned in `.mise.toml` and installed via `mise install`; the repo carries no other toolchain setup. Linux and macOS are the supported platforms — there are no Windows scripts.
+
+Never run `bootstrap.sh` or the `WS/scripts/*.sh` scripts with `sudo` — mise exports `JAVA_HOME`/`PATH` into the user's shell, and `sudo` discards them, so Gradle fails with `JAVA_HOME is not set`. On Linux, Docker needing root is fixed by adding the user to the `docker` group (root README), not by `sudo`. All these scripts source `WS/scripts/lib/preflight.sh`, which checks for `sudo`, an unreachable Docker daemon, and missing `java`/`node`.
 
 ## Agent skills
 
@@ -29,6 +33,9 @@ re-apply it if you do.
 
 ## Keeping the READMEs current
 
-The root `README.md` is the definitive, step-by-step source of truth for setting up and running this project from a clean machine — someone should be able to follow it top to bottom with no other context. `FE/README.md` and `WS/README.md` are the per-subproject supplements it links to.
+The three READMEs divide the work, and each step belongs to exactly one of them:
 
-Whenever a change affects how someone would set up, install, configure, or run the project — a new prerequisite, a changed command, a new setup step, a changed port, etc. — update the relevant README(s) (root and/or `FE/README.md` / `WS/README.md`) in the same change. Don't leave this for a follow-up; treat stale setup instructions as a bug.
+- `README.md` — what the project is, the machine-level prerequisites, toolchain setup via mise, and a handoff to the two subproject READMEs. It does not document how to set up or run either project.
+- `WS/README.md` and `FE/README.md` — each is the complete and only setup path for its own project, readable start to finish without the other. A contributor reads the root README once for prerequisites, then works entirely from one subproject README.
+
+Setup instructions live in exactly one file. When a change affects how someone would set up, install, configure, or run something — a new prerequisite, a changed command, a new step, a changed port — update the file that owns that step, in the same change. Don't add a second copy elsewhere for convenience, and don't leave it for a follow-up; treat stale setup instructions as a bug.

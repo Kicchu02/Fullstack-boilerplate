@@ -2,30 +2,44 @@
 
 A modern full-stack web application boilerplate featuring a React TypeScript frontend with Vite build tooling and a Kotlin backend with PostgreSQL database. Includes authentication, routing, state management, and Docker development environment setup.
 
-This README is the definitive, step-by-step guide to setting up and running this project from a clean machine. Follow it in order.
+This README covers what to install on your machine and where to go next. The two projects are set up from their own READMEs.
+
+Supported platforms: **Linux** and **macOS**.
 
 ## Prerequisites
 
-Install these before doing anything else:
+| Tool          | Install instructions                                                                                                                      |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Git           | <https://git-scm.com/downloads>                                                                                                            |
+| Docker        | macOS: [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) · Linux: [Docker Engine](https://docs.docker.com/engine/install/) |
+| mise          | [Set up your toolchain](#set-up-your-toolchain) below                                                                                      |
+| IntelliJ IDEA | <https://www.jetbrains.com/idea/download/> — Community Edition is sufficient                                                                |
 
-1. **Git** — to clone this repository.
-2. **Docker** — required to run the PostgreSQL database.
-   - **Windows/macOS**: install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and make sure it is running.
-   - **Linux**: install Docker Engine and the Docker Compose plugin (`docker compose version` should work).
-3. **[mise](https://mise.jdx.dev/)** — manages the exact Node.js and Java versions this project needs (pinned in `.mise.toml` at the repo root). See [Step 1](#step-1-install-mise) below.
-4. **[IntelliJ IDEA](https://www.jetbrains.com/idea/)** — the backend (`WS/`) is run from IntelliJ, not the command line. The free Community Edition is sufficient.
+### Linux: run Docker without sudo
 
-## Step 1: Install mise
+On Linux the Docker socket is owned by `root`, so `docker` needs `sudo` until you add yourself to the `docker` group:
 
-Pick the instructions for your OS.
+```bash
+sudo usermod -aG docker $USER
+newgrp docker            # or log out and back in — group membership is set at login
+docker run hello-world   # verify: no sudo, no permission error
+```
 
-### macOS / Linux
+Do this before running any of the project scripts. macOS Docker Desktop needs no equivalent step.
+
+**Never run the project scripts with `sudo`.** `sudo` starts a fresh root environment and discards the `PATH` and `JAVA_HOME` that mise sets in your shell, so the build fails with `JAVA_HOME is not set`. The scripts refuse to run under `sudo` for this reason.
+
+## Set up your toolchain
+
+Node.js and Java come from [mise](https://mise.jdx.dev/), which reads the versions from [`.mise.toml`](.mise.toml) and puts them on your `PATH` while you are inside this project.
+
+Install mise:
 
 ```bash
 curl https://mise.run | sh
 ```
 
-Then activate mise in your shell (pick the line matching your shell, run it once):
+Activate it in your shell by running the line that matches the shell you use:
 
 ```bash
 # bash
@@ -38,110 +52,30 @@ echo 'eval "$(~/.local/bin/mise activate zsh)"' >> "${ZDOTDIR-$HOME}/.zshrc"
 echo '~/.local/bin/mise activate fish | source' >> ~/.config/fish/config.fish
 ```
 
-Restart your terminal (or `source` the file you just edited), then verify:
+Restart your terminal so the activation takes effect, then install the toolchain from the repository root:
 
 ```bash
-mise --version
-```
-
-### Windows
-
-Using [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/) (or use `scoop install mise` / `choco install mise` if you prefer those):
-
-```powershell
-winget install jdx.mise
-```
-
-Activate mise in PowerShell:
-
-```powershell
-echo '(&mise activate pwsh) | Out-String | Invoke-Expression' >> $HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
-```
-
-Restart your terminal, then verify:
-
-```powershell
-mise --version
-```
-
-## Step 2: Clone the repository and install pinned tool versions
-
-```bash
-git clone <this-repo-url>
-cd Fullstack-boilerplate
 mise install
 ```
 
-This reads `.mise.toml` and installs the exact Node.js and Java (Temurin) versions this project is pinned to — currently Node.js 24 (LTS) and Java 25 (Temurin, LTS). Verify it worked:
+Confirm Node.js and Java are active:
 
 ```bash
-node -v        # should print v24.x.x
-java -version  # should print openjdk version "25...", Temurin
+mise ls
 ```
 
-(If `.mise.toml` is ever updated to pin different versions, these numbers — and this README — should be updated to match.)
+mise only puts Node.js and Java on `PATH` in shells where it has been activated, and the project scripts inherit the environment of whatever shell you launch them from. So activate it in the shell you actually work in — if you run the scripts from a different shell than the one you configured above, they will report that `java` or `node` is missing.
 
-If these commands aren't found, your shell activation from Step 1 didn't take effect — restart your terminal and try again.
+## Set up the projects
 
-## Step 3: Run the bootstrap script
+Each project is set up and run from its own README. Follow whichever one you are working on — both are self-contained, so you can work on one without reading the other.
 
-From the repo root:
+- **Backend** — follow [`WS/README.md`](WS/README.md).
+- **Frontend** — follow [`FE/README.md`](FE/README.md). The frontend calls the backend, so set the backend up first.
 
-**Linux/macOS:**
-
-```bash
-./bootstrap.sh
-```
-
-**Windows:**
-
-```bash
-.\bootstrap.bat
-```
-
-This is safe to re-run. It will:
-
-1. Start the PostgreSQL Docker container for the backend (`WS/`), then run Flyway migrations and JOOQ code generation against it.
-2. Run `npm install` for the frontend (`FE/`).
-
-Docker must already be running before this step (see Prerequisites).
-
-## Step 4: Run the backend (WS)
-
-The backend is run from IntelliJ IDEA:
-
-1. Open the `WS/` folder as a project in IntelliJ IDEA.
-2. Let IntelliJ import the Gradle project (watch the status bar until it finishes).
-3. Run the pre-configured **`ApplicationKt`** run configuration (top-right run dropdown, or `Run ▸ Run...`).
-
-The server starts on `http://localhost:8080`. See [`WS/README.md`](WS/README.md) for database start/stop scripts, migrations, and formatting commands.
-
-## Step 5: Run the frontend (FE)
-
-In a separate terminal, from the repo root:
-
-```bash
-cd FE
-npm run dev
-```
-
-Open `http://localhost:3000` in your browser. See [`FE/README.md`](FE/README.md) for more.
-
-## Stopping the project
-
-Stop the backend from IntelliJ (stop the running configuration), stop the frontend dev server with `Ctrl+C`, and stop the database container:
-
-```bash
-cd WS
-./scripts/stop_dev_docker.sh   # or scripts\stop_dev_docker.bat on Windows
-```
+Working on both? `./bootstrap.sh` runs the backend database setup and the frontend dependency install in one go. You still need the IntelliJ steps in [`WS/README.md`](WS/README.md) to run the backend afterwards.
 
 ## Project Structure
 
-- **FE/** - React frontend application
-- **WS/** - Kotlin backend workspace
-
-## More Information
-
-- [Frontend README](FE/README.md)
-- [Backend README](WS/README.md)
+- **[FE/](FE/README.md)** — React frontend application
+- **[WS/](WS/README.md)** — Kotlin backend workspace

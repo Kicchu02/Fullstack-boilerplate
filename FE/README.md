@@ -2,31 +2,33 @@
 
 This is a React + TypeScript + Vite project with routing and state management.
 
+This project is worked on standalone — everything you need to set it up and run it is in this README.
+
 ## Prerequisites
 
-Node.js and npm are managed via [mise](https://mise.jdx.dev/), pinned in the `.mise.toml` at the repo root (currently Node.js 24 LTS, with npm bundled). See the [root README](../README.md) for installing mise and running `mise install` — do that first if you haven't already.
+Install mise and run `mise install` — see the [root README](../README.md). mise supplies the Node.js and npm versions this project uses, read from [`../.mise.toml`](../.mise.toml).
+
+This app calls the backend at `http://localhost:8080`, so get the backend running first by following [`../WS/README.md`](../WS/README.md). You do not need to know anything about the backend stack to do that.
 
 ## Installation & Setup
 
 ### Step 1: Install Dependencies
 
-Open your terminal/command prompt in the project directory and run:
+From this directory:
 
 ```bash
 npm install
 ```
 
-This command will install all the required dependencies listed in `package.json`.
+This installs the dependency versions recorded in `package-lock.json`.
 
 ### Step 2: Start Development Server
-
-After the installation is complete, start the development server by running:
 
 ```bash
 npm run dev
 ```
 
-This will start the Vite development server with hot module replacement (HMR).
+This starts the Vite development server with hot module replacement (HMR).
 
 ### Step 3: Access the Application
 
@@ -38,3 +40,13 @@ Network: use --host to expose
 ```
 
 Open your web browser and navigate to `http://localhost:3000/` to view the application.
+
+Stop the development server with `Ctrl+C`.
+
+## Other Commands
+
+```bash
+npm run build     # type-check and build for production into dist/
+npm run lint      # run ESLint
+npm run preview   # serve the production build
+```

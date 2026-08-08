@@ -16,7 +16,7 @@ Docker needs to be running before you start the database, and you need to be abl
 
 ### 1. Database Setup
 
-The project uses PostgreSQL in Docker, published on host port `54321` (see `configuration/application.conf`). The scripts below locate themselves, so you can run them from any directory.
+The project uses PostgreSQL in Docker, published on host port `54321` (see `configuration/application.conf`). The `./scripts/*.sh` commands below locate themselves, so you can run them from any directory. The plain `docker compose` commands have to be run from `WS/`, where `docker-compose.yml` lives.
 
 **Start the database.** This also applies the Flyway migrations and generates the JOOQ sources:
 
@@ -24,7 +24,7 @@ The project uses PostgreSQL in Docker, published on host port `54321` (see `conf
 ./scripts/start_dev_docker.sh
 ```
 
-**Stop the database and keep your data:**
+**Stop the database and keep your data** — from `WS/`:
 
 ```bash
 docker compose down

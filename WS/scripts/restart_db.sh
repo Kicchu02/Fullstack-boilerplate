@@ -7,6 +7,10 @@ echo "♻️ Restarting Dev Database..."
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# stop_dev_docker.sh skips flywayClean when the database is already down, so
+# running this on a stopped database still reaches the start step below. It only
+# exits non-zero when the clean genuinely failed, and `set -e` stopping here is
+# deliberate then: starting again would just hit a Flyway validation error.
 "$SCRIPT_DIR/stop_dev_docker.sh"
 "$SCRIPT_DIR/start_dev_docker.sh"
 

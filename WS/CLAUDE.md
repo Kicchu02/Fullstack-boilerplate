@@ -11,10 +11,11 @@ Java is pinned to Temurin 17 in `../.mise.toml`. `build.gradle.kts` declares no 
 ## Commands
 
 - `./scripts/start_dev_docker.sh` — `docker compose up -d` (Postgres on host port 54321) → `./gradlew flywayMigrate` → `./gradlew generateJooq`. Run this before building/running, and again after adding a migration, since JOOQ classes are generated from the live schema.
-- `./scripts/stop_dev_docker.sh` — `flywayClean` then `docker compose down`. Destructive: use plain `docker compose down` to stop the DB without dropping data.
+- `./scripts/stop_dev_docker.sh` — `flywayClean` then `docker compose down`. Destructive: run plain `docker compose down` from `WS/` to stop the DB without dropping data. `flywayClean` is skipped (with a notice) when the DB is already down, and `docker compose down` always runs even if the clean fails — so the script never leaves the container up after saying it stopped it.
 - `./scripts/restart_db.sh` — stop then start; use after editing `src/main/resources/db/migration/*.sql`.
 - All three scripts `cd` to `WS/` themselves, so they work from any directory. Linux/macOS only — there are no `.bat` equivalents.
 - `scripts/lib/preflight.sh` is sourced by the start/stop scripts (and by `../bootstrap.sh`) and aborts with a fix message when `sudo` was used, Docker is unreachable, or `java`/`node` is missing. Never run these scripts with `sudo`: it discards the `PATH`/`JAVA_HOME` mise sets in the user's shell and Gradle fails with `JAVA_HOME is not set`. If Docker needs root, the fix is the `docker` group, not `sudo`.
+- `scripts/lib/db.sh` holds `db_is_ready`/`wait_for_db`, used by both the start and stop scripts. The probe passes `-h 127.0.0.1` on purpose: unix-socket `pg_isready` also answers from the postgres entrypoint's init-time temporary server, which reports ready before the real TCP listener is up on a fresh volume. Keep the `-h` on any new probe, including the `docker-compose.yml` healthcheck.
 - `./gradlew build` — compile/build.
 - `./gradlew spotlessApply` — auto-format (ktlint via Spotless); run before committing Kotlin changes.
 - The app is intended to be run from IntelliJ IDEA (see `.run/ApplicationKt.run.xml`, main class `com.example.ApplicationKt`, program arg `configuration/application.conf`) rather than via a gradlew run task.

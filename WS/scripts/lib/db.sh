@@ -27,3 +27,39 @@ wait_for_db() {
   done
   return 1
 }
+
+# A Postgres data directory can only be read by the major version that wrote it, and the
+# postgres:18 image additionally moved PGDATA from /var/lib/postgresql/data to
+# /var/lib/postgresql/18/docker. So a pgdata volume created by an older image is both
+# unreadable and mounted at the wrong place: Postgres would quietly initialise a fresh
+# cluster alongside the old files and hand back an empty database that looks fine.
+#
+# Detect that case up front and say so, instead of letting it look like success.
+# Uses `docker compose run` so Compose resolves the volume itself — no guessing at the
+# project-name prefix of the volume.
+require_compatible_pgdata() {
+  local legacy
+  legacy=$(docker compose run --rm --no-deps --entrypoint sh db -c \
+    'if [ -f /var/lib/postgresql/PG_VERSION ]; then cat /var/lib/postgresql/PG_VERSION; fi' \
+    2>/dev/null | tr -d '\r[:space:]')
+
+  if [ -n "$legacy" ]; then
+    echo "" >&2
+    echo "❌ The 'pgdata' volume holds a PostgreSQL ${legacy} data directory, but this project" >&2
+    echo "   now runs PostgreSQL 18. Postgres cannot read a data directory written by an" >&2
+    echo "   older major version, so the database cannot start from it." >&2
+    echo "" >&2
+    echo "   This is local development data only. Delete the volume and let the migrations" >&2
+    echo "   rebuild the schema from scratch — run this from WS/:" >&2
+    echo "" >&2
+    echo "       docker compose down -v" >&2
+    echo "       ./scripts/start_dev_docker.sh" >&2
+    echo "" >&2
+    echo "   If there is data in there you actually need, dump it with the OLD image first:" >&2
+    echo "       docker run --rm -v ws_pgdata:/var/lib/postgresql/data -e POSTGRES_PASSWORD=x \\" >&2
+    echo "         postgres:${legacy} pg_dumpall -U admin > backup.sql" >&2
+    echo "" >&2
+    return 1
+  fi
+  return 0
+}

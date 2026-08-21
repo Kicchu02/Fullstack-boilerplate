@@ -13,6 +13,11 @@ require_no_sudo
 require_docker
 require_java
 
+# Fail fast and legibly if the volume was written by an older Postgres major.
+if ! require_compatible_pgdata; then
+  exit 1
+fi
+
 echo "🚀 Starting Docker Compose..."
 docker compose up -d
 

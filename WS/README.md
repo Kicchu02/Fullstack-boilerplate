@@ -84,6 +84,20 @@ Stop the application from IntelliJ when you are done, then stop the database wit
 ./gradlew build
 ```
 
+## Tests
+
+```bash
+./gradlew test
+```
+
+The tests run on JUnit 5 and need **no database and no running server** — they cover the
+password policy and hashing (`user/PasswordUtilsTest`), email validation
+(`dto/EmailIdTest`), and the JSON shapes the frontend depends on (`dto/SerializationTest`).
+`./gradlew build` runs them too.
+
+Anything that touches JOOQ-generated code does need a live database, because the JOOQ
+sources are generated from the running schema — see Database Setup above.
+
 ## Database Migrations
 
 The project uses Flyway for database migrations. Migration scripts live in `src/main/resources/db/migration/` and are named `V<n>__description.sql`.

@@ -21,7 +21,8 @@ The Gradle wrapper (9.7.1) is what caps the Java version, and it supports Java 2
 - `./gradlew build` — compile/build.
 - `./gradlew spotlessApply` — auto-format (ktlint via Spotless); run before committing Kotlin changes.
 - The app is intended to be run from IntelliJ IDEA (see `.run/ApplicationKt.run.xml`, main class `com.example.ApplicationKt`, program arg `configuration/application.conf`) rather than via a gradlew run task.
-- Config/credentials for local dev live in `configuration/application.conf` (HOCON) — DB connection, token expiry, password policy. No test suite is currently present.
+- `./gradlew test` — JUnit 5. The suite is deliberately DB-free (`user/PasswordUtilsTest`, `dto/EmailIdTest`, `dto/SerializationTest`), so it runs without Docker. `PasswordUtils` is a `KoinComponent` that injects `Config`, so its test starts a Koin context with an inline HOCON policy in `@BeforeEach` and calls `stopKoin()` in `@AfterEach` — follow that pattern for any other `KoinComponent` under test, and remember Koin is global state, so a missing `stopKoin()` leaks into the next test class. Testing a query implementation would need a live database, since JOOQ sources are generated from the running schema.
+- Config/credentials for local dev live in `configuration/application.conf` (HOCON) — DB connection, token expiry, password policy.
 
 ## Architecture — layered, interface-first, one feature package per domain
 

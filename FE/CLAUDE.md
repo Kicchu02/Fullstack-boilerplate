@@ -29,9 +29,6 @@ One dependency is intentionally **not** on its latest published version. It was 
 against the registry, and bumping it breaks the build — so check here before "helpfully"
 upgrading it.
 
-(The mobx 6.x ceiling that used to be listed here is gone: mobx, mobx-react-lite and
-mobx-state-tree were removed when state management moved to Zustand.)
-
 - **TypeScript stays on 6.0.x.** `typescript-eslint@8.67.0` is the latest release (there is
   no 9.x) and declares `typescript: ">=4.8.4 <6.1.0"`. TypeScript 7 (the Go port) is
   published, but `npm run lint` is what pins this. Lifting it means waiting for
@@ -53,7 +50,7 @@ State management is **Zustand**, not Redux/MobX/Context-alone. There is **no sto
 - `src/helpers.ts` provides `getAPI`/`postAPI`/`putAPI`/`deleteAPI` axios wrappers (always `withCredentials: true`). Use these instead of calling `axios` directly.
 - Routing: `src/router.tsx` defines one `createBrowserRouter` with `App` as the layout route (renders global snackbars + `<Outlet/>`) and pages as children. Route path strings live in `src/RoutesHelper.ts`'s `Routes` map; navigate via the `useNavigateHelper()` hook (typed `navigateToX()` functions), not raw `useNavigate()`/string paths.
 - Auth token is stored in `localStorage` under `WEB_TOKEN_COOKIE_NAME` ("WebToken"), but actual authentication with the backend is cookie/session-based (`withCredentials: true`); the localStorage token is only used client-side to decide whether to redirect to sign-in on load.
-- Pages (`src/pages/*.tsx`) are plain function components — **no `observer()` wrapper**, since Zustand re-renders through its own hook subscriptions.
+- Pages (`src/pages/*.tsx`) are plain function components. There is no state-library wrapper to apply — components re-render through the Zustand hook subscriptions described above.
 - The component library is **Ant Design v6** (`antd`) — no Tailwind, no CSS modules, no Emotion, no styled-components. antd styles itself through CSS-in-JS, so there is nothing to import per component; `antd/dist/reset.css` is imported once in `main.tsx`, before `main.css`.
 - **Theming goes in `ConfigProvider` in `main.tsx`**, not in per-component overrides. It is currently empty, which is the hook point for design tokens.
 - Layout is antd `Flex` (`vertical`, `align`, `justify`, `gap`) plus a plain `style` prop for dimensions. There is no `sx` prop in antd, and a leftover `sx={{...}}` is a **compile error** (`TS2322`), not a silent no-op — so `tsc -b` catches this class of porting mistake for you.

@@ -2,9 +2,8 @@ import axios from "axios";
 import { BASE_URL } from "./constants";
 import { Endpoints } from "./stores/NetworkingStore";
 
-// showPopup and showFeatureInDevPopup now live in stores/UiStore.ts. They used to be here
-// because they needed getRoot() to walk from a page store up to the MST root; a Zustand
-// store is reachable directly, so they belong with the state they set.
+// showPopup and showFeatureInDevPopup live in stores/UiStore.ts, next to the state they
+// set. This module is only the axios wrapper layer.
 
 type HttpMethod = "get" | "post" | "put" | "delete";
 type EndpointValue = (typeof Endpoints)[keyof typeof Endpoints];

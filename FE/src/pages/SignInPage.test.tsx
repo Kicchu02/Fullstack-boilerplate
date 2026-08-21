@@ -1,5 +1,5 @@
-import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LOCATION_TEST_ID, renderWithProviders } from "../test/renderWithProviders";
 import { SignInPage } from "./SignInPage";

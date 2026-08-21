@@ -1,9 +1,8 @@
 import { Button, Stack, Typography } from "@mui/material";
-import { observer } from "mobx-react-lite";
 import type React from "react";
 import { useNavigateHelper } from "../RoutesHelper";
 
-export const ErrorPage = observer((): React.ReactElement => {
+export const ErrorPage = (): React.ReactElement => {
   const navigateHelper = useNavigateHelper();
 
   return (
@@ -26,4 +25,4 @@ export const ErrorPage = observer((): React.ReactElement => {
       </Button>
     </Stack>
   );
-});
+};

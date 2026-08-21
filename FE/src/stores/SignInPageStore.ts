@@ -1,47 +1,45 @@
 import { AxiosError } from "axios";
-import {
-  applySnapshot,
-  flow,
-  getSnapshot,
-  types,
-  type Instance,
-} from "mobx-state-tree";
+import { create } from "zustand";
 import { EMPTY_STRING, WEB_TOKEN_COOKIE_NAME } from "../constants";
 import { postAPI } from "../helpers";
 import { Endpoints } from "./NetworkingStore";
 
-export const SignInPageStore = types
-  .model("SignInPageStore", {
-    email: types.optional(types.string, EMPTY_STRING),
-    password: types.optional(types.string, EMPTY_STRING),
-    isLoading: types.optional(types.boolean, false),
-    isEmailInvalid: types.optional(types.boolean, false),
-    isPasswordInvalid: types.optional(types.boolean, false),
-  })
-  .volatile(() => ({
-    initialState: {} as ReturnType<typeof getSnapshot>,
-  }))
-  .actions((store) => ({
-    afterCreate: (): void => {
-      store.initialState = getSnapshot(store);
-    },
-    reset: (): void => {
-      applySnapshot(store, store.initialState);
-    },
-    setEmail: (email: string): void => {
-      store.email = email;
-    },
-    setPassword: (password: string): void => {
-      store.password = password;
-    },
-    signIn: flow(function* () {
-      store.isLoading = true;
-      store.isEmailInvalid = false;
-      store.isPasswordInvalid = false;
+type SignInState = {
+  email: string;
+  password: string;
+  isLoading: boolean;
+  isEmailInvalid: boolean;
+  isPasswordInvalid: boolean;
+};
+
+type SignInActions = {
+  setEmail: (email: string) => void;
+  setPassword: (password: string) => void;
+  signIn: () => Promise<void>;
+  reset: () => void;
+};
+
+const initialState: SignInState = {
+  email: EMPTY_STRING,
+  password: EMPTY_STRING,
+  isLoading: false,
+  isEmailInvalid: false,
+  isPasswordInvalid: false,
+};
+
+export const useSignInPageStore = create<SignInState & SignInActions>()(
+  (set, get) => ({
+    ...initialState,
+    setEmail: (email) => set({ email }),
+    setPassword: (password) => set({ password }),
+    reset: () => set(initialState),
+
+    signIn: async () => {
+      set({ isLoading: true, isEmailInvalid: false, isPasswordInvalid: false });
       try {
-        const response = yield postAPI(Endpoints.SIGN_IN, {
-          emailId: { emailId: store.email },
-          password: store.password,
+        const response = await postAPI(Endpoints.SIGN_IN, {
+          emailId: { emailId: get().email },
+          password: get().password,
         });
         localStorage.setItem(WEB_TOKEN_COOKIE_NAME, response.data.webToken);
       } catch (e) {
@@ -50,34 +48,29 @@ export const SignInPageStore = types
           const { status, data } = error.response;
           switch (status) {
             case 400:
-              store.isEmailInvalid = true;
+              set({ isEmailInvalid: true });
               break;
             case 401:
               if (data === "Email doesn't exist.") {
-                store.isEmailInvalid = true;
+                set({ isEmailInvalid: true });
               } else if (data === "Invalid password.") {
-                store.isPasswordInvalid = true;
+                set({ isPasswordInvalid: true });
               }
               break;
           }
         }
       } finally {
-        store.isLoading = false;
+        set({ isLoading: false });
       }
-    }),
-  }))
-  .views((store) => ({
-    get isButtonDisabled(): boolean {
-      return (
-        store.email.trim() === EMPTY_STRING ||
-        store.password.trim() === EMPTY_STRING
-      );
     },
-    get isAPIErrored(): boolean {
-      return store.isEmailInvalid || store.isPasswordInvalid;
-    },
-  }));
+  }),
+);
 
-export const createSignInPageStore = (): Instance<typeof SignInPageStore> => {
-  return SignInPageStore.create({});
-};
+// Derived state. These were MST `.views` getters; as selectors they stay out of the stored
+// state and each returns a primitive, so a component subscribing to one only re-renders
+// when that boolean actually flips.
+export const selectIsButtonDisabled = (s: SignInState): boolean =>
+  s.email.trim() === EMPTY_STRING || s.password.trim() === EMPTY_STRING;
+
+export const selectIsAPIErrored = (s: SignInState): boolean =>
+  s.isEmailInvalid || s.isPasswordInvalid;

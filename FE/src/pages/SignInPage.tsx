@@ -9,16 +9,29 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { observer } from "mobx-react-lite";
 import React, { useState } from "react";
-import { showPopup } from "../helpers";
 import { useNavigateHelper } from "../RoutesHelper";
-import { useSignInPageStore } from "../stores/hooks";
+import {
+  selectIsAPIErrored,
+  selectIsButtonDisabled,
+  useSignInPageStore,
+} from "../stores/SignInPageStore";
+import { showPopup } from "../stores/UiStore";
 
-export const SignInPage = observer((): React.ReactElement => {
+export const SignInPage = (): React.ReactElement => {
   const navigateHelper = useNavigateHelper();
-  const signInPageStore = useSignInPageStore();
   const [showPassword, setShowPassword] = useState(false);
+
+  const email = useSignInPageStore((s) => s.email);
+  const password = useSignInPageStore((s) => s.password);
+  const isLoading = useSignInPageStore((s) => s.isLoading);
+  const isEmailInvalid = useSignInPageStore((s) => s.isEmailInvalid);
+  const isPasswordInvalid = useSignInPageStore((s) => s.isPasswordInvalid);
+  const isButtonDisabled = useSignInPageStore(selectIsButtonDisabled);
+  const setEmail = useSignInPageStore((s) => s.setEmail);
+  const setPassword = useSignInPageStore((s) => s.setPassword);
+  const signIn = useSignInPageStore((s) => s.signIn);
+  const reset = useSignInPageStore((s) => s.reset);
 
   return (
     <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
@@ -29,24 +42,24 @@ export const SignInPage = observer((): React.ReactElement => {
           type="email"
           fullWidth
           required
-          value={signInPageStore.email}
-          onChange={(e) => signInPageStore.setEmail(e.target.value)}
-          error={signInPageStore.isEmailInvalid}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={isEmailInvalid}
           helperText={
-            signInPageStore.isEmailInvalid ? "Invalid email" : undefined
+            isEmailInvalid ? "Invalid email" : undefined
           }
-          disabled={signInPageStore.isLoading}
+          disabled={isLoading}
         />
         <TextField
           label="Password"
           type={showPassword ? "text" : "password"}
           fullWidth
           required
-          value={signInPageStore.password}
-          onChange={(e) => signInPageStore.setPassword(e.target.value)}
-          error={signInPageStore.isPasswordInvalid}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={isPasswordInvalid}
           helperText={
-            signInPageStore.isPasswordInvalid ? "Invalid password" : undefined
+            isPasswordInvalid ? "Invalid password" : undefined
           }
           slotProps={{
             input: {
@@ -54,7 +67,7 @@ export const SignInPage = observer((): React.ReactElement => {
                 <InputAdornment position="end">
                   <IconButton
                     onClick={() => setShowPassword(!showPassword)}
-                    disabled={signInPageStore.isLoading}
+                    disabled={isLoading}
                   >
                     {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                   </IconButton>
@@ -62,23 +75,23 @@ export const SignInPage = observer((): React.ReactElement => {
               ),
             },
           }}
-          disabled={signInPageStore.isLoading}
+          disabled={isLoading}
         />
         <Button
           variant="contained"
           fullWidth
           size="large"
-          disabled={signInPageStore.isButtonDisabled}
+          disabled={isButtonDisabled}
           onClick={async () => {
-            await signInPageStore.signIn();
-            if (signInPageStore.isAPIErrored) {
+            await signIn();
+            if (selectIsAPIErrored(useSignInPageStore.getState())) {
               return;
             }
-            showPopup(signInPageStore, "Sign in successful", "success");
-            signInPageStore.reset();
+            showPopup("Sign in successful", "success");
+            reset();
             navigateHelper.navigateToHome();
           }}
-          loading={signInPageStore.isLoading}
+          loading={isLoading}
         >
           Sign In
         </Button>
@@ -86,10 +99,10 @@ export const SignInPage = observer((): React.ReactElement => {
           Don't have an account?{" "}
           <Link
             onClick={() => {
-              if (signInPageStore.isLoading) {
+              if (isLoading) {
                 return;
               }
-              signInPageStore.reset();
+              reset();
               navigateHelper.navigateToSignUp();
             }}
             style={{ cursor: "pointer" }}
@@ -100,4 +113,4 @@ export const SignInPage = observer((): React.ReactElement => {
       </Stack>
     </Stack>
   );
-});
+};

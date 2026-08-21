@@ -3,12 +3,10 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import "./main.css";
 import { router } from "./router";
-import { RootStoreProvider } from "./stores/RootStore";
 
+// No store provider: Zustand stores are module singletons imported where they are used.
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RootStoreProvider>
-      <RouterProvider router={router} />
-    </RootStoreProvider>
+    <RouterProvider router={router} />
   </StrictMode>
 );

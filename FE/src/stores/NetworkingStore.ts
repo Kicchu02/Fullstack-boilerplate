@@ -1,10 +1,5 @@
 import axios from "axios";
-import {
-  applySnapshot,
-  getSnapshot,
-  types,
-  type Instance,
-} from "mobx-state-tree";
+import { create } from "zustand";
 
 export const Endpoints = {
   SIGN_UP: "/user/signUp",
@@ -13,43 +8,43 @@ export const Endpoints = {
   DUMMY: "/dummy/dummy",
 } as const;
 
-export const NetworkingStore = types
-  .model("NetworkingStore", {
-    errorCode: types.maybe(types.number),
-  })
-  .volatile(() => ({
-    initialState: {} as ReturnType<typeof getSnapshot>,
-  }))
-  .actions((store) => ({
-    setErrorCode: (errorCode: number) => {
-      store.errorCode = errorCode;
-    },
-  }))
-  .actions((store) => ({
-    afterCreate: (): void => {
-      store.initialState = getSnapshot(store);
-      axios.interceptors.response.use(
-        (response) => response,
-        (error) => {
-          store.setErrorCode(error.status as number);
-          return Promise.reject(error);
-        }
-      );
-    },
-
-    reset: (): void => {
-      applySnapshot(store, store.initialState);
-    },
-  }))
-  .views((store) => ({
-    get isUnauthorized(): boolean {
-      return store.errorCode === 401;
-    },
-    get isAPIErrored(): boolean {
-      return store.errorCode === 500;
-    },
-  }));
-
-export const createNetworkingStore = (): Instance<typeof NetworkingStore> => {
-  return NetworkingStore.create({});
+type NetworkingState = {
+  errorCode: number | undefined;
 };
+
+type NetworkingActions = {
+  setErrorCode: (errorCode: number) => void;
+  reset: () => void;
+};
+
+const initialState: NetworkingState = { errorCode: undefined };
+
+/**
+ * The global error channel. Every axios failure lands here, and App watches the selectors
+ * below to force a sign-in redirect or route to the error page — so API-calling code does
+ * not need its own global error handling.
+ */
+export const useNetworkingStore = create<NetworkingState & NetworkingActions>()(
+  (set) => ({
+    ...initialState,
+    setErrorCode: (errorCode) => set({ errorCode }),
+    reset: () => set(initialState),
+  }),
+);
+
+export const selectIsUnauthorized = (s: NetworkingState): boolean =>
+  s.errorCode === 401;
+
+export const selectIsAPIErrored = (s: NetworkingState): boolean =>
+  s.errorCode === 500;
+
+// Installed once, when this module is first imported. Under MST this ran in the store's
+// `afterCreate`, which meant a new interceptor was registered every time a root store was
+// created — once per app start in production, but once per render in tests.
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    useNetworkingStore.getState().setErrorCode(error.status as number);
+    return Promise.reject(error);
+  },
+);

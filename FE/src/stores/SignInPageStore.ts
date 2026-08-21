@@ -43,7 +43,6 @@ export const SignInPageStore = types
           emailId: { emailId: store.email },
           password: store.password,
         });
-        console.log("response", response);
         localStorage.setItem(WEB_TOKEN_COOKIE_NAME, response.data.webToken);
       } catch (e) {
         const error = e as AxiosError;

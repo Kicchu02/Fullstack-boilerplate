@@ -23,6 +23,12 @@ export default tseslint.config([
       globals: globals.browser,
     },
     rules: {
+      // Debug logging has leaked secrets here before: a console.log in the sign-in flow
+      // printed the web token, and another printed it on every app load. warn/error stay
+      // allowed — HomePageStore's catch blocks use console.error deliberately, and
+      // silencing those would turn handled failures into invisible ones.
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+
       // stores/RootStore.tsx exports the RootStore MST model alongside the
       // RootStoreProvider component. react-refresh flags that because a file mixing
       // components with other values cannot be hot-updated reliably. RootStore is a

@@ -15,13 +15,14 @@ val dbUrl = "jdbc:postgresql://$dbHost:$dbPort/$dbName"
 buildscript {
     dependencies {
         classpath("com.typesafe:config:1.4.2")
+        classpath("org.flywaydb:flyway-database-postgresql:13.3.0")
     }
 }
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
-    id("org.flywaydb.flyway") version "9.22.0"
+    id("org.flywaydb.flyway") version "13.3.0"
     id("nu.studer.jooq") version "8.2"
     id("com.diffplug.spotless") version "8.10.0"
     alias(libs.plugins.kotlin.serialization)

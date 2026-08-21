@@ -41,7 +41,7 @@ class PasswordUtils : KoinComponent {
 
     internal fun isPasswordStrong(password: String): Boolean =
         (
-            password.length > minimumLength &&
+            password.length >= minimumLength &&
                 password.count { it.isUpperCase() } >= minimumNumberOfCapitalLetters &&
                 password.count { !it.isLetterOrDigit() } >= minimumNumberOfSpecialCharacters &&
                 password.count { it.isDigit() } >= minimumNumberOfNumbers

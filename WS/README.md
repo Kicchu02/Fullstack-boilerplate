@@ -42,6 +42,21 @@ docker compose down
 ./scripts/restart_db.sh
 ```
 
+### Coming from an older checkout
+
+The database runs PostgreSQL 18. A `pgdata` volume created by an earlier version of this
+project holds a PostgreSQL 12 data directory, and Postgres cannot read a data directory
+written by an older major version. `start_dev_docker.sh` detects this and stops with
+instructions rather than starting an empty database that looks fine.
+
+The fix, from `WS/` — this is local development data, and the migrations rebuild the
+schema from scratch:
+
+```bash
+docker compose down -v
+./scripts/start_dev_docker.sh
+```
+
 ## Running the Application
 
 ### 1. Running the Application in IntelliJ IDEA

@@ -17,7 +17,10 @@ import org.koin.core.component.inject
 import java.time.Instant
 import java.util.UUID
 
-internal class SignInServerImpl(private val call: ApplicationCall) : SignIn(), KoinComponent {
+internal class SignInServerImpl(
+    private val call: ApplicationCall,
+) : SignIn(),
+    KoinComponent {
     private val config by inject<Config>()
     private val expirationDurationInSeconds = config.getLong("token.expirationDurationInSeconds")
     private val checkIfUserExistsByEmail by inject<CheckIfUserExistsByEmail>()
@@ -26,48 +29,56 @@ internal class SignInServerImpl(private val call: ApplicationCall) : SignIn(), K
     private val getPasswordAndSaltByUserId by inject<GetPasswordAndSaltByUserId>()
     private val passwordUtils by inject<PasswordUtils>()
 
-    override suspend fun execute(request: Request): Response {
-        return DatabaseFactory.transaction { ctx ->
+    override suspend fun execute(request: Request): Response =
+        DatabaseFactory.transaction { ctx ->
             val userId = validateRequestGetUserId(ctx = ctx, request = request)
             val wt = UUID.randomUUID()
             insertIntoWT.execute(
                 ctx = ctx,
-                input = InsertIntoWT.Input(
-                    wt = wt,
-                    userId = userId,
-                    expiresAt = Instant.now().plusSeconds(expirationDurationInSeconds),
-                ),
+                input =
+                    InsertIntoWT.Input(
+                        wt = wt,
+                        userId = userId,
+                        expiresAt = Instant.now().plusSeconds(expirationDurationInSeconds),
+                    ),
             )
             call.response.cookies.append(
-                item = Cookie(
-                    name = "WebToken",
-                    value = wt.toString(),
-                    path = "/",
-                    httpOnly = true,
-                    maxAge = expirationDurationInSeconds.toInt(),
-                    secure = false,
-                ),
+                item =
+                    Cookie(
+                        name = "WebToken",
+                        value = wt.toString(),
+                        path = "/",
+                        httpOnly = true,
+                        maxAge = expirationDurationInSeconds.toInt(),
+                        secure = false,
+                    ),
             )
             Response(webToken = wt)
         }
-    }
 
-    private fun validateRequestGetUserId(ctx: DSLContext, request: Request): UUID {
-        if (!checkIfUserExistsByEmail.execute(
-                ctx = ctx,
-                input = CheckIfUserExistsByEmail.Input(emailId = request.emailId),
-            ).exists
+    private fun validateRequestGetUserId(
+        ctx: DSLContext,
+        request: Request,
+    ): UUID {
+        if (!checkIfUserExistsByEmail
+                .execute(
+                    ctx = ctx,
+                    input = CheckIfUserExistsByEmail.Input(emailId = request.emailId),
+                ).exists
         ) {
             throw InvalidEmailId()
         }
-        val userId = getUserIdByEmail.execute(
-            ctx = ctx,
-            input = GetUserIdByEmail.Input(emailId = request.emailId),
-        ).userId
-        val (hashedPassword, salt) = getPasswordAndSaltByUserId.execute(
-            ctx = ctx,
-            input = GetPasswordAndSaltByUserId.Input(userId = userId),
-        )
+        val userId =
+            getUserIdByEmail
+                .execute(
+                    ctx = ctx,
+                    input = GetUserIdByEmail.Input(emailId = request.emailId),
+                ).userId
+        val (hashedPassword, salt) =
+            getPasswordAndSaltByUserId.execute(
+                ctx = ctx,
+                input = GetPasswordAndSaltByUserId.Input(userId = userId),
+            )
         if (!passwordUtils.isPasswordValid(
                 plainPasswordToCheck = request.password,
                 hashedPassword = hashedPassword,

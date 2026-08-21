@@ -7,18 +7,21 @@ import com.example.user.apiInterfaces.SignOut
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-internal class SignOutServerImpl(private val userIdentity: UserIdentity) : SignOut(), KoinComponent {
+internal class SignOutServerImpl(
+    private val userIdentity: UserIdentity,
+) : SignOut(),
+    KoinComponent {
     private val invalidateWTByUserId by inject<InvalidateWTByUserId>()
 
-    override suspend fun execute(request: Request): Response {
-        return DatabaseFactory.transaction { ctx ->
+    override suspend fun execute(request: Request): Response =
+        DatabaseFactory.transaction { ctx ->
             invalidateWTByUserId.execute(
                 ctx = ctx,
-                input = InvalidateWTByUserId.Input(
-                    userId = userIdentity.userId,
-                ),
+                input =
+                    InvalidateWTByUserId.Input(
+                        userId = userIdentity.userId,
+                    ),
             )
             Response
         }
-    }
 }

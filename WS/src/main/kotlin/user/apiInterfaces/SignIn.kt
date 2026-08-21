@@ -27,8 +27,15 @@ abstract class SignIn : APIInterface<Request, Response> {
         val webToken: UUID,
     ) : APIResponse
 
-    sealed class SignInException(message: String? = null) : Exception(message) {
-        class InvalidEmailId(message: String? = null) : SignInException(message = message)
-        class InvalidPassword(message: String? = null) : SignInException(message = message)
+    sealed class SignInException(
+        message: String? = null,
+    ) : Exception(message) {
+        class InvalidEmailId(
+            message: String? = null,
+        ) : SignInException(message = message)
+
+        class InvalidPassword(
+            message: String? = null,
+        ) : SignInException(message = message)
     }
 }

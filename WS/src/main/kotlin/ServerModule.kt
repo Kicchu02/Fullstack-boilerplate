@@ -33,26 +33,29 @@ import com.example.user.apiInterfaces.ValidateWT
 import io.ktor.server.application.ApplicationCall
 import org.koin.dsl.module
 
-val routesModules = module {
-    single<SignUp> { SignUpServerImpl() }
-    single<ValidateWT> { ValidateWTServerImpl() }
-    factory<SignIn> { (call: ApplicationCall) -> SignInServerImpl(call = call) }
-    factory<SignOut> { (userIdentity: UserIdentity) -> SignOutServerImpl(userIdentity = userIdentity) }
-    factory<DummyApi> { (userIdentity: UserIdentity) -> DummyApiServerImpl(userIdentity = userIdentity) }
-}
+val routesModules =
+    module {
+        single<SignUp> { SignUpServerImpl() }
+        single<ValidateWT> { ValidateWTServerImpl() }
+        factory<SignIn> { (call: ApplicationCall) -> SignInServerImpl(call = call) }
+        factory<SignOut> { (userIdentity: UserIdentity) -> SignOutServerImpl(userIdentity = userIdentity) }
+        factory<DummyApi> { (userIdentity: UserIdentity) -> DummyApiServerImpl(userIdentity = userIdentity) }
+    }
 
-val databaseModules = module {
-    single<InsertIntoUser> { InsertIntoUserPostgres() }
-    single<CheckIfUserExistsByEmail> { CheckIfUserExistsByEmailPostgres() }
-    single<FetchPrivilegesOfUser> { FetchPrivilegesOfUserPostgres() }
-    single<FetchWTExpiresAtAndUserIdOrNull> { FetchWTExpiresAtAndUserIdOrNullPostgres() }
-    single<UpdateWTExpireTime> { UpdateWTExpireTimePostgres() }
-    single<InsertIntoWT> { InsertIntoWTPostgres() }
-    single<GetPasswordAndSaltByUserId> { GetPasswordAndSaltByUserIdPostgres() }
-    single<GetUserIdByEmail> { GetUserIdByEmailPostgres() }
-    single<InvalidateWTByUserId> { InvalidateWTByUserIdPostgres() }
-}
+val databaseModules =
+    module {
+        single<InsertIntoUser> { InsertIntoUserPostgres() }
+        single<CheckIfUserExistsByEmail> { CheckIfUserExistsByEmailPostgres() }
+        single<FetchPrivilegesOfUser> { FetchPrivilegesOfUserPostgres() }
+        single<FetchWTExpiresAtAndUserIdOrNull> { FetchWTExpiresAtAndUserIdOrNullPostgres() }
+        single<UpdateWTExpireTime> { UpdateWTExpireTimePostgres() }
+        single<InsertIntoWT> { InsertIntoWTPostgres() }
+        single<GetPasswordAndSaltByUserId> { GetPasswordAndSaltByUserIdPostgres() }
+        single<GetUserIdByEmail> { GetUserIdByEmailPostgres() }
+        single<InvalidateWTByUserId> { InvalidateWTByUserIdPostgres() }
+    }
 
-val utilsModules = module {
-    single<PasswordUtils> { PasswordUtils() }
-}
+val utilsModules =
+    module {
+        single<PasswordUtils> { PasswordUtils() }
+    }

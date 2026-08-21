@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Kotlin 2.1 + Ktor 3.1 (Netty engine), JOOQ (typed SQL, codegen from DB schema) + Flyway (migrations), PostgreSQL, Koin (DI), kotlinx.serialization. Single Gradle module, package root `com.example`. Serves on port 8080; the FE dev server (`../FE`) expects it there.
 
-Java is pinned to Temurin 21 in `../.mise.toml`, and `build.gradle.kts` declares `kotlin { jvmToolchain(21) }`. The two must move together: the mise pin decides which JDK Gradle *runs* on, the toolchain decides what bytecode it *emits*, and letting them drift means the build silently compiles for one target on another runtime.
+Java is pinned to Temurin 25 in `../.mise.toml`, and `build.gradle.kts` declares `kotlin { jvmToolchain(25) }`. The two must move together: the mise pin decides which JDK Gradle *runs* on, the toolchain decides what bytecode it *emits*, and letting them drift means the build silently compiles for one target on another runtime. Java 25 emits class file major version 69 — a quick way to confirm the toolchain is actually in effect rather than cosmetic.
 
-The Gradle wrapper (8.10) is what caps the Java version — it supports JDKs up to 23, so Java 21 needs no wrapper change. Going to Java 25 does: it requires Gradle 9, which in turn breaks the Kotlin plugin, Flyway, JOOQ, and Spotless versions pinned here, so that upgrade is a coordinated change rather than a version bump. Every `./gradlew` run already warns that this build "is incompatible with Gradle 9.0" for the same reason.
+The Gradle wrapper (9.7.1) is what caps the Java version, and it supports Java 25. Builds are clean — `./gradlew help --warning-mode all` reports no deprecations. If a future Java bump needs a newer Gradle, bump the wrapper with the `wrapper` task (`./gradlew wrapper --gradle-version X --gradle-distribution-sha256-sum <sum>`) rather than hand-editing `gradle-wrapper.properties`, so the jar, both launcher scripts and the pinned checksum stay consistent.
 
 ## Commands
 

@@ -35,7 +35,7 @@ version = "0.0.1"
 // bytecode a clone produces doesn't depend on the developer's shell. Keep this in
 // step with the java pin in ../.mise.toml.
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 application {

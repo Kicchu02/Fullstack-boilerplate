@@ -10,9 +10,9 @@ vi.mock("../helpers", async (importOriginal) => ({
   postAPI,
 }));
 
-// These render through MUI, so they double as the regression net for MUI upgrades:
-// TextField (with slotProps), Button (with the `loading` prop), IconButton and
-// InputAdornment all have to keep producing accessible, queryable DOM.
+// These render through Ant Design, so they double as the regression net for it: Input,
+// Input.Password (with its built-in show/hide control), Button (with the `loading` prop)
+// and the label/id wiring all have to keep producing accessible, queryable DOM.
 describe("SignInPage", () => {
   beforeEach(() => {
     postAPI.mockReset();
@@ -53,23 +53,19 @@ describe("SignInPage", () => {
     expect(email).toHaveValue("someone@example.com");
   });
 
-  it("toggles password visibility from the adornment button", async () => {
+  it("toggles password visibility from the built-in control", async () => {
     const user = userEvent.setup();
     renderWithProviders(<SignInPage />);
 
     const password = screen.getByLabelText(/password/i);
     expect(password).toHaveAttribute("type", "password");
 
-    // The only other button on the page is the disabled "Sign In" submit.
-    const toggle = screen
-      .getAllByRole("button")
-      .find((b) => b.textContent === "");
-    expect(toggle).toBeDefined();
-
-    await user.click(toggle!);
+    // antd's Input.Password renders its show/hide control as a <span role="button"> whose
+    // aria-label flips between "Show" and "Hide" — hence the alternation and the re-query.
+    await user.click(screen.getByRole("button", { name: /show|hide/i }));
     expect(password).toHaveAttribute("type", "text");
 
-    await user.click(toggle!);
+    await user.click(screen.getByRole("button", { name: /show|hide/i }));
     expect(password).toHaveAttribute("type", "password");
   });
 
@@ -92,5 +88,29 @@ describe("SignInPage", () => {
       expect(screen.queryByText("Sign in successful")).not.toBeInTheDocument(),
     );
     expect(screen.getByTestId(LOCATION_TEST_ID)).not.toHaveTextContent("/home");
+  });
+
+  it("marks an errored field invalid and links its message, for assistive tech", async () => {
+    postAPI.mockRejectedValue({
+      response: { status: 401, data: "Invalid password." },
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<SignInPage />);
+    await user.type(screen.getByLabelText(/email/i), "a@b.com");
+    await user.type(screen.getByLabelText(/password/i), "wrong");
+
+    await user.click(screen.getByRole("button", { name: "Sign In" }));
+
+    // antd's status="error" is only a CSS class, so these attributes are set explicitly.
+    const pw = await waitFor(() => {
+      const el = screen.getByLabelText(/password/i);
+      expect(el).toHaveAttribute("aria-invalid", "true");
+      return el;
+    });
+    expect(pw).toHaveAttribute("aria-describedby", "signInPasswordError");
+    expect(document.getElementById("signInPasswordError")).toHaveTextContent(
+      "Invalid password",
+    );
+    expect(screen.getByLabelText(/email/i)).toBeRequired();
   });
 });

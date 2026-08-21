@@ -1,4 +1,4 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Button, Flex, Typography } from "antd";
 import type React from "react";
 import { useNavigateHelper } from "../RoutesHelper";
 
@@ -6,25 +6,27 @@ export const PageNotFoundPage = (): React.ReactElement => {
   const navigate = useNavigateHelper();
 
   return (
-    <Stack
-      sx={{
-        height: "100%",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 2,
-      }}
+    <Flex
+      vertical
+      align="center"
+      justify="center"
+      gap={16}
+      style={{ height: "100%" }}
     >
-      <Typography variant="h1">404</Typography>
-      <Typography variant="h2">Page Not Found</Typography>
+      <Typography.Title level={1} style={{ marginBottom: 0 }}>
+        404
+      </Typography.Title>
+      <Typography.Title level={2} style={{ marginTop: 0 }}>
+        Page Not Found
+      </Typography.Title>
       <Button
-        variant="outlined"
-        color="primary"
+        size="large"
         onClick={() => {
           navigate.navigateToHome();
         }}
       >
         Go to Home
       </Button>
-    </Stack>
+    </Flex>
   );
 };

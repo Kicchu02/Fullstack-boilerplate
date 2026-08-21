@@ -1,4 +1,5 @@
-import { Button, CircularProgress, Stack, Typography } from "@mui/material";
+import { Button, Card, Flex, Spin, Typography } from "antd";
+import type React from "react";
 import { useEffect } from "react";
 import { useNavigateHelper } from "../RoutesHelper";
 import { useHomePageStore } from "../stores/HomePageStore";
@@ -20,35 +21,30 @@ export const HomePage = (): React.ReactElement => {
   }, [dummyAPI, reset]);
 
   return (
-    <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
+    <Flex align="center" justify="center" style={{ height: "100%" }}>
       {isLoading ? (
-        <CircularProgress />
+        <Spin size="large" />
       ) : (
-        <Stack
-          sx={{
-            gap: 2,
-            alignItems: "center",
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-            p: 2,
-          }}
-        >
-          <Typography variant="subtitle1">{dummyData}</Typography>
-          <Button
-            variant="contained"
-            color="error"
-            loading={isSignOutLoading}
-            onClick={async () => {
-              await signOut();
-              reset();
-              navigateHelper.navigateToSignIn();
-            }}
-          >
-            Sign Out
-          </Button>
-        </Stack>
+        // Card replaces the hand-rolled bordered Stack: it already carries antd's border,
+        // radius and padding tokens, so the box follows the theme instead of hardcoding it.
+        <Card>
+          <Flex vertical gap={16} align="center">
+            <Typography.Text>{dummyData}</Typography.Text>
+            <Button
+              type="primary"
+              danger
+              loading={isSignOutLoading}
+              onClick={async () => {
+                await signOut();
+                reset();
+                navigateHelper.navigateToSignIn();
+              }}
+            >
+              Sign Out
+            </Button>
+          </Flex>
+        </Card>
       )}
-    </Stack>
+    </Flex>
   );
 };

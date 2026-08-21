@@ -14,7 +14,7 @@ val dbUrl = "jdbc:postgresql://$dbHost:$dbPort/$dbName"
 
 buildscript {
     dependencies {
-        classpath("com.typesafe:config:1.4.2")
+        classpath("com.typesafe:config:1.4.9")
         classpath("org.flywaydb:flyway-database-postgresql:13.3.0")
     }
 }
@@ -57,12 +57,18 @@ dependencies {
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 
-    implementation("org.postgresql:postgresql:42.7.2")
-    implementation("com.zaxxer:HikariCP:5.0.1")
-    jooqGenerator("org.postgresql:postgresql:42.7.2")
-    implementation("io.insert-koin:koin-core:3.5.0")
-    implementation("io.insert-koin:koin-ktor:3.5.0")
-    implementation("io.insert-koin:koin-logger-slf4j:3.5.0")
+    implementation(libs.postgresql)
+    implementation(libs.hikaricp)
+    jooqGenerator(libs.postgresql)
+
+    // Application.kt imports com.typesafe.config.Config directly, so declare it rather
+    // than relying on it arriving transitively through Ktor's HOCON config support.
+    implementation(libs.typesafe.config)
+
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.ktor)
+    implementation(libs.koin.logger.slf4j)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation)

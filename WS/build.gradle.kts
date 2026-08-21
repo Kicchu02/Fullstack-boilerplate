@@ -92,10 +92,11 @@ dependencies {
     // than relying on it arriving transitively through Ktor's HOCON config support.
     implementation(libs.typesafe.config)
 
+    // koin-core only. This app starts Koin in main() and resolves through GlobalContext
+    // rather than Ktor's install(Koin) plugin, so koin-ktor and koin-logger-slf4j are not
+    // used — see WS/CLAUDE.md before adding them back.
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
-    implementation(libs.koin.ktor)
-    implementation(libs.koin.logger.slf4j)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation)

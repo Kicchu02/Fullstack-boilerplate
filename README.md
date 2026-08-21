@@ -81,6 +81,8 @@ Working on both? `./bootstrap.sh` runs the backend database setup and the fronte
 
 Each project can be verified on its own: [`WS/scripts/verify.sh`](WS/scripts/verify.sh) and [`FE/scripts/verify.sh`](FE/scripts/verify.sh).
 
+**CI runs these same two scripts on every pull request** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), so a green local run is a green CI run — there is no second, separate definition of "passing" to keep in step. The toolchain in CI comes from [`.mise.toml`](.mise.toml) via `mise`, the same file you install from locally.
+
 ## Project Structure
 
 - **[FE/](FE/README.md)** — React frontend application

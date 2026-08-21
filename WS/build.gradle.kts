@@ -30,6 +30,13 @@ plugins {
 group = "com.example"
 version = "0.0.1"
 
+// Pins the compile target instead of inheriting whatever JDK is on PATH, so the
+// bytecode a clone produces doesn't depend on the developer's shell. Keep this in
+// step with the java pin in ../.mise.toml.
+kotlin {
+    jvmToolchain(21)
+}
+
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
 

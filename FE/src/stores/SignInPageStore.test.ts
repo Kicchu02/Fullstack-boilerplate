@@ -116,6 +116,46 @@ describe("SignInPageStore", () => {
     expect(selectIsAPIErrored(store())).toBe(false);
   });
 
+  it("treats a network failure with no response as an error, not a success", async () => {
+    // No `response` on the error, which is what axios gives when the backend is
+    // unreachable. Previously nothing was flagged, so callers read this as success.
+    postAPI.mockRejectedValue(new Error("Network Error"));
+    store().setEmail("a@b.com");
+    store().setPassword("Passw0rd!");
+
+    await store().signIn();
+
+    expect(store().hasRequestFailed).toBe(true);
+    expect(selectIsAPIErrored(store())).toBe(true);
+    expect(localStorage.getItem(WEB_TOKEN_COOKIE_NAME)).toBeNull();
+    expect(store().isLoading).toBe(false);
+  });
+
+  it("treats an unhandled status as an error, not a success", async () => {
+    postAPI.mockRejectedValue({ response: { status: 500, data: "boom" } });
+    store().setEmail("a@b.com");
+    store().setPassword("Passw0rd!");
+
+    await store().signIn();
+
+    expect(selectIsAPIErrored(store())).toBe(true);
+    expect(localStorage.getItem(WEB_TOKEN_COOKIE_NAME)).toBeNull();
+  });
+
+  it("clears hasRequestFailed on a later successful attempt", async () => {
+    postAPI.mockRejectedValueOnce(new Error("Network Error"));
+    store().setEmail("a@b.com");
+    store().setPassword("Passw0rd!");
+    await store().signIn();
+    expect(store().hasRequestFailed).toBe(true);
+
+    postAPI.mockResolvedValueOnce({ data: { webToken: "token-789" } });
+    await store().signIn();
+
+    expect(store().hasRequestFailed).toBe(false);
+    expect(selectIsAPIErrored(store())).toBe(false);
+  });
+
   it("sets isLoading while the request is in flight", async () => {
     let release!: (v: unknown) => void;
     postAPI.mockReturnValue(new Promise((r) => (release = r)));

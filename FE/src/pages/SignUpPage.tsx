@@ -93,7 +93,14 @@ export const SignUpPage = (): React.ReactElement => {
           disabled={isButtonDisabled}
           onClick={async () => {
             await signUp();
-            if (selectIsAPIErrored(useSignUpPageStore.getState())) {
+            const state = useSignUpPageStore.getState();
+            if (state.hasRequestFailed) {
+              // Nothing on the form explains this one, so say so rather than leaving the
+              // user staring at a button that stopped spinning.
+              showPopup("Something went wrong. Please try again.", "error");
+              return;
+            }
+            if (selectIsAPIErrored(state)) {
               return;
             }
             showPopup("Sign up successful", "success");

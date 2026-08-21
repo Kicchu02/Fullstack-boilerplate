@@ -84,7 +84,14 @@ export const SignInPage = (): React.ReactElement => {
           disabled={isButtonDisabled}
           onClick={async () => {
             await signIn();
-            if (selectIsAPIErrored(useSignInPageStore.getState())) {
+            const state = useSignInPageStore.getState();
+            if (state.hasRequestFailed) {
+              // Nothing on the form explains this one, so say so rather than leaving the
+              // user staring at a button that stopped spinning.
+              showPopup("Something went wrong. Please try again.", "error");
+              return;
+            }
+            if (selectIsAPIErrored(state)) {
               return;
             }
             showPopup("Sign in successful", "success");

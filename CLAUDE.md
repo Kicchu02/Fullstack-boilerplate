@@ -18,6 +18,16 @@ Node.js and Java are pinned in `.mise.toml` and installed via `mise install`; th
 
 Never run `bootstrap.sh` or the `WS/scripts/*.sh` scripts with `sudo` — mise exports `JAVA_HOME`/`PATH` into the user's shell, and `sudo` discards them, so Gradle fails with `JAVA_HOME is not set`. On Linux, Docker needing root is fixed by adding the user to the `docker` group (root README), not by `sudo`. All these scripts source `WS/scripts/lib/preflight.sh`, which checks for `sudo`, an unreachable Docker daemon, and missing `java`/`node`.
 
+## Verifying a change
+
+`./verify.sh` from the repo root runs both projects' full suites; `WS/scripts/verify.sh` and
+`FE/scripts/verify.sh` run one each. **CI runs those same two scripts on every pull request**
+(`.github/workflows/ci.yml`), so there is no separate CI definition to keep in step.
+
+Prefer these over the individual commands before claiming something works. `./gradlew build`
+does not start a server or touch the database, and `npm run build` does not run the tests or
+serve the output — the gaps those leave are exactly where the bugs in this repo have been.
+
 ## Agent skills
 
 Shared skills live in `.claude/skills/` and are checked in, so every teammate gets them

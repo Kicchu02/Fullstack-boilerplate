@@ -2,8 +2,12 @@
 [versions]
 kotlin-version = "2.4.10"
 ktor-version = "3.5.2"
-logback-version = "1.5.13"
+logback-version = "1.6.3"
 kotlinx-serialization-version = "1.11.0"
+postgresql-version = "42.7.13"
+hikaricp-version = "7.1.0"
+koin-version = "4.2.2"
+typesafe-config-version = "1.4.9"
 
 [libraries]
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor-version" }
@@ -16,6 +20,14 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor-version" }
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor-version" }
 ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor-version" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql-version" }
+hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp-version" }
+typesafe-config = { module = "com.typesafe:config", version.ref = "typesafe-config-version" }
+# koin-bom governs the version of every koin-* artifact below, so they are declared without one.
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-version" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-ktor = { module = "io.insert-koin:koin-ktor" }
+koin-logger-slf4j = { module = "io.insert-koin:koin-logger-slf4j" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }

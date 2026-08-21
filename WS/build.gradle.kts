@@ -55,7 +55,11 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
-    testImplementation(libs.kotlin.test.junit)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.kotlin.test.junit5)
+    testImplementation(libs.junit.jupiter)
+    // Gradle needs the launcher on the test runtime classpath to run the JUnit Platform.
+    testRuntimeOnly(libs.junit.platform.launcher)
 
     implementation(libs.postgresql)
     implementation(libs.hikaricp)
@@ -118,6 +122,13 @@ jooq {
                 }
             }
         }
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
     }
 }
 

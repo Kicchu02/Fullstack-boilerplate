@@ -22,11 +22,11 @@ export const SignUpPage = observer((): React.ReactElement => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <Stack height="100%" alignItems="center" justifyContent="center">
-      <Stack gap={4} width="400px" alignItems="center">
+    <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
+      <Stack sx={{ gap: 4, width: "400px", alignItems: "center" }}>
         <Typography variant="h4">Sign Up</Typography>
         {signUpPageStore.isEmailAlreadyExists && (
-          <Stack width="100%">
+          <Stack sx={{ width: "100%" }}>
             <Alert severity="error">This email is already in use</Alert>
           </Stack>
         )}

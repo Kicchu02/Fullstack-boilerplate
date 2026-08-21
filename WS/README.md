@@ -42,6 +42,21 @@ docker compose down
 ./scripts/restart_db.sh
 ```
 
+### Coming from an older checkout
+
+The database runs PostgreSQL 18. A `pgdata` volume created by an earlier version of this
+project holds a PostgreSQL 12 data directory, and Postgres cannot read a data directory
+written by an older major version. `start_dev_docker.sh` detects this and stops with
+instructions rather than starting an empty database that looks fine.
+
+The fix, from `WS/` — this is local development data, and the migrations rebuild the
+schema from scratch:
+
+```bash
+docker compose down -v
+./scripts/start_dev_docker.sh
+```
+
 ## Running the Application
 
 ### 1. Running the Application in IntelliJ IDEA
@@ -63,11 +78,42 @@ The server serves on `http://localhost:8080`.
 
 Stop the application from IntelliJ when you are done, then stop the database with one of the commands above.
 
-### 2. Build the Project
+### 2. Run from the Command Line
+
+Start the database first, then, from `WS/`:
+
+```bash
+./gradlew run
+```
+
+The server serves on `http://localhost:8080`. Stop it with `Ctrl+C`.
+
+To run the packaged build instead:
+
+```bash
+./gradlew installDist
+./build/install/ktor-sample/bin/ktor-sample configuration/application.conf
+```
+
+### 3. Build the Project
 
 ```bash
 ./gradlew build
 ```
+
+## Tests
+
+```bash
+./gradlew test
+```
+
+The tests run on JUnit 5 and need **no database and no running server** — they cover the
+password policy and hashing (`user/PasswordUtilsTest`), email validation
+(`dto/EmailIdTest`), and the JSON shapes the frontend depends on (`dto/SerializationTest`).
+`./gradlew build` runs them too.
+
+Anything that touches JOOQ-generated code does need a live database, because the JOOQ
+sources are generated from the running schema — see Database Setup above.
 
 ## Database Migrations
 

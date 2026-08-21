@@ -23,15 +23,16 @@ object DatabaseFactory : KoinComponent {
     private lateinit var dataSource: DataSource
 
     fun init() {
-        val config = HikariConfig().apply {
-            jdbcUrl = dbUrl
-            username = dbUser
-            password = dbPassword
-            driverClassName = "org.postgresql.Driver"
-            maximumPoolSize = 10
-            isAutoCommit = false
-            transactionIsolation = "TRANSACTION_REPEATABLE_READ"
-        }
+        val config =
+            HikariConfig().apply {
+                jdbcUrl = dbUrl
+                username = dbUser
+                password = dbPassword
+                driverClassName = "org.postgresql.Driver"
+                maximumPoolSize = 10
+                isAutoCommit = false
+                transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+            }
         dataSource = HikariDataSource(config)
     }
 
@@ -61,8 +62,9 @@ object DatabaseFactory : KoinComponent {
     }
 }
 
-fun <T : Any> Record.getNonNullValue(field: TableField<*, T?>): T {
-    return this.get(field) ?: throw IllegalStateException("Field ${field.name} is unexpectedly null")
-}
+fun <T : Any> Record.getNonNullValue(field: TableField<*, T?>): T =
+    this.get(field) ?: throw IllegalStateException("Field ${field.name} is unexpectedly null")
 
-class DBException(message: String? = null) : RuntimeException(message)
+class DBException(
+    message: String? = null,
+) : RuntimeException(message)

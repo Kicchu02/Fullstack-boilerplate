@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:12
+    image: postgres:18
     container_name: demo_app_db
     environment:
       POSTGRES_USER: admin
@@ -9,7 +9,12 @@ services:
     ports:
       - "54321:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      # Mounted at /var/lib/postgresql, NOT /var/lib/postgresql/data. The postgres:18
+      # image moved PGDATA to /var/lib/postgresql/18/docker and declares its VOLUME at
+      # /var/lib/postgresql. Keeping the old .../data mount would leave PGDATA outside
+      # the named volume, so the database would come up empty on every recreate while
+      # appearing to work. Keep this path in step with the image's PGDATA.
+      - pgdata:/var/lib/postgresql
     healthcheck:
       # -h forces TCP. Without it pg_isready probes the unix socket, which the
       # entrypoint's init-time temporary server answers before the real server

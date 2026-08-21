@@ -9,7 +9,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run lint` — ESLint (flat config)
 - `npm run preview` — preview production build
 
-No test framework/script is configured. This frontend talks to the WS backend at `http://localhost:8080` (see `src/constants.ts`'s `BASE_URL`) — see `../WS/CLAUDE.md` to run it.
+- `npm test` — Vitest, single run; `npm run test:watch` — watch mode
+
+Tests are Vitest + React Testing Library in a `jsdom` environment, configured in the
+`test` block of `vite.config.ts` (note `defineConfig` is imported from `vitest/config`,
+not `vite`, or `tsc -b` rejects that block). `globals: false`, so `describe`/`it`/`expect`
+are imported explicitly — which also means Testing Library's automatic cleanup does not
+register itself and is wired up by hand in `src/test/setup.ts`. Drop that `afterEach(cleanup)`
+and every render accumulates in the same document, and queries start failing with "found
+multiple elements". `src/test/renderWithProviders.tsx` wraps a component in
+`RootStoreProvider` plus a `MemoryRouter`; pages need both, since they reach state through
+`useRootStore()` and navigate through `useNavigateHelper()`.
+
+This frontend talks to the WS backend at `http://localhost:8080` (see `src/constants.ts`'s `BASE_URL`) — see `../WS/CLAUDE.md` to run it. The tests do not need it running.
+
+## Deliberate version ceilings
+
+Two dependencies are intentionally **not** on their latest published version. Both were
+verified against the registry, and bumping either breaks the build — so check here before
+"helpfully" upgrading them.
+
+- **mobx stays on 6.x.** `mobx-state-tree@7.3.2` is the latest release and declares
+  `peerDependencies: { mobx: "^6.3.0" }`. Every store in `src/stores/` is built on MST, so
+  mobx 7 is not available until MST supports it. `mobx-react-lite` is pinned to 4.x for the
+  same reason — its 5.x line requires `mobx ^7.0.0`.
+- **TypeScript stays on 6.0.x.** `typescript-eslint@8.67.0` is the latest release (there is
+  no 9.x) and declares `typescript: ">=4.8.4 <6.1.0"`. TypeScript 7 (the Go port) is
+  published, but `npm run lint` is what pins this. Lifting it means waiting for
+  typescript-eslint to support TS 7, or replacing typescript-eslint.
 
 ## Architecture
 
@@ -22,5 +49,5 @@ State management is **MobX-State-Tree (MST)**, not Redux/Zustand/Context-alone:
 - `src/helpers.ts` provides `getAPI`/`postAPI`/`putAPI`/`deleteAPI` axios wrappers (always `withCredentials: true`) and `showPopup`/`showFeatureInDevPopup` (reach the MST root via `getRoot()` from within a store action). Use these instead of calling `axios` directly.
 - Routing: `src/router.tsx` defines one `createBrowserRouter` with `App` as the layout route (renders global snackbars + `<Outlet/>`) and pages as children. Route path strings live in `src/RoutesHelper.ts`'s `Routes` map; navigate via the `useNavigateHelper()` hook (typed `navigateToX()` functions), not raw `useNavigate()`/string paths.
 - Auth token is stored in `localStorage` under `WEB_TOKEN_COOKIE_NAME` ("WebToken"), but actual authentication with the backend is cookie/session-based (`withCredentials: true`); the localStorage token is only used client-side to decide whether to redirect to sign-in on load.
-- Pages (`src/pages/*.tsx`) are MobX `observer()`-wrapped function components using MUI (Material UI v7 + Emotion) directly via props/`sx` — no Tailwind, no CSS modules, no separate form library (controlled `TextField`s bound straight to store fields).
+- Pages (`src/pages/*.tsx`) are MobX `observer()`-wrapped function components using MUI (Material UI v9 + Emotion) — no Tailwind, no CSS modules, no separate form library (controlled `TextField`s bound straight to store fields). **Layout goes through `sx`, not top-level props.** MUI 9 removed the system-props shorthand, so `<Stack height="100%" gap={2}>` no longer type-checks; write `<Stack sx={{ height: "100%", gap: 2 }}>`. `direction`, `spacing`, `divider` and `useFlexGap` remain real `Stack` props.
 - No path aliases are configured; imports are relative.

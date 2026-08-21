@@ -31,14 +31,13 @@ export const App = observer((): React.ReactElement => {
     if (!token || token === "undefined" || token === "null") {
       navigateHelper.navigateToSignIn();
     } else if (token !== "undefined" && token !== "null") {
-      console.log("token", token);
       navigateHelper.navigateToHome();
     }
     return networkingStore.reset;
   }, [navigateHelper, networkingStore]);
 
   return (
-    <Stack height="100%">
+    <Stack sx={{ height: "100%" }}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={rootStore.showFeatureInDevPopup}

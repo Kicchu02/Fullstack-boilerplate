@@ -20,7 +20,10 @@ class PasswordUtils : KoinComponent {
         return Base64.getEncoder().encodeToString(saltBytes)
     }
 
-    internal fun hashPassword(password: String, salt: String): String {
+    internal fun hashPassword(
+        password: String,
+        salt: String,
+    ): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val combined = (password + salt).toByteArray()
         val hashedBytes = digest.digest(combined)
@@ -36,12 +39,11 @@ class PasswordUtils : KoinComponent {
         return attemptedHash == hashedPassword
     }
 
-    internal fun isPasswordStrong(password: String): Boolean {
-        return (
-            password.length > minimumLength &&
+    internal fun isPasswordStrong(password: String): Boolean =
+        (
+            password.length >= minimumLength &&
                 password.count { it.isUpperCase() } >= minimumNumberOfCapitalLetters &&
                 password.count { !it.isLetterOrDigit() } >= minimumNumberOfSpecialCharacters &&
                 password.count { it.isDigit() } >= minimumNumberOfNumbers
-            )
-    }
+        )
 }

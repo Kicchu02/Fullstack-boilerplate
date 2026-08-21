@@ -9,13 +9,14 @@ internal class InvalidateWTByUserIdPostgres : InvalidateWTByUserId() {
         ctx: DSLContext,
         input: Input,
     ): Result {
-        ctx.update(WEBTOKEN)
+        ctx
+            .update(WEBTOKEN)
             .set(WEBTOKEN.ISDELETED, true)
             .where(
-                WEBTOKEN.USERID.eq(input.userId)
+                WEBTOKEN.USERID
+                    .eq(input.userId)
                     .and(WEBTOKEN.ISDELETED.isFalse),
-            )
-            .execute()
+            ).execute()
         return Result
     }
 }

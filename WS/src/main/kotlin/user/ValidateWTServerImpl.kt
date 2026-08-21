@@ -12,7 +12,9 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.time.Instant
 
-internal class ValidateWTServerImpl : ValidateWT(), KoinComponent {
+internal class ValidateWTServerImpl :
+    ValidateWT(),
+    KoinComponent {
     private val config by inject<Config>()
     private val expirationDurationInSeconds = config.getLong("token.expirationDurationInSeconds")
     private val expirationRefreshThresholdInSeconds = config.getLong("token.expirationRefreshThresholdInSeconds")
@@ -20,38 +22,45 @@ internal class ValidateWTServerImpl : ValidateWT(), KoinComponent {
     private val fetchWTExpiresAtAndUserIdOrNull by inject<FetchWTExpiresAtAndUserIdOrNull>()
     private val updateWTExpireTime by inject<UpdateWTExpireTime>()
 
-    override suspend fun execute(request: Request): Response {
-        return DatabaseFactory.transaction { ctx ->
+    override suspend fun execute(request: Request): Response =
+        DatabaseFactory.transaction { ctx ->
             val currentTime = Instant.now()
-            val (userId, expiresAt) = fetchWTExpiresAtAndUserIdOrNull.execute(
-                ctx = ctx,
-                input = FetchWTExpiresAtAndUserIdOrNull.Input(
-                    wt = request.wt,
-                    currentTime = currentTime,
-                ),
-            ).userIdAndExpiresAt ?: throw InvalidWTException()
+            val (userId, expiresAt) =
+                fetchWTExpiresAtAndUserIdOrNull
+                    .execute(
+                        ctx = ctx,
+                        input =
+                            FetchWTExpiresAtAndUserIdOrNull.Input(
+                                wt = request.wt,
+                                currentTime = currentTime,
+                            ),
+                    ).userIdAndExpiresAt ?: throw InvalidWTException()
             if (expiresAt < currentTime.plusSeconds(expirationRefreshThresholdInSeconds)) {
                 updateWTExpireTime.execute(
                     ctx = ctx,
-                    input = UpdateWTExpireTime.Input(
-                        wt = request.wt,
-                        expiresAt = currentTime.plusSeconds(expirationDurationInSeconds),
-                        currentTime = currentTime,
-                    ),
+                    input =
+                        UpdateWTExpireTime.Input(
+                            wt = request.wt,
+                            expiresAt = currentTime.plusSeconds(expirationDurationInSeconds),
+                            currentTime = currentTime,
+                        ),
                 )
             }
-            val userPrivileges = fetchPrivilegesOfUser.execute(
-                ctx = ctx,
-                input = FetchPrivilegesOfUser.Input(
-                    userId = userId,
-                ),
-            ).privileges
+            val userPrivileges =
+                fetchPrivilegesOfUser
+                    .execute(
+                        ctx = ctx,
+                        input =
+                            FetchPrivilegesOfUser.Input(
+                                userId = userId,
+                            ),
+                    ).privileges
             Response(
-                userIdentity = UserIdentity(
-                    userId = userId,
-                    privileges = userPrivileges,
-                ),
+                userIdentity =
+                    UserIdentity(
+                        userId = userId,
+                        privileges = userPrivileges,
+                    ),
             )
         }
-    }
 }

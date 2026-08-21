@@ -14,17 +14,19 @@ export const HomePage = observer((): React.ReactElement => {
   }, [homePageStore]);
 
   return (
-    <Stack height="100%" alignItems="center" justifyContent="center">
+    <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
       {homePageStore.isLoading ? (
         <CircularProgress />
       ) : (
         <Stack
-          gap={2}
-          alignItems="center"
-          border="1px solid"
-          borderColor="divider"
-          borderRadius={2}
-          p={2}
+          sx={{
+            gap: 2,
+            alignItems: "center",
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 2,
+            p: 2,
+          }}
         >
           <Typography variant="subtitle1">{homePageStore.dummyData}</Typography>
           <Button

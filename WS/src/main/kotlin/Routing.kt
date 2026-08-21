@@ -36,6 +36,7 @@ private fun Route.userRoutes() {
                     call.response.status(value = HttpStatusCode.Conflict)
                     call.respondText(text = "Email already exists.")
                 }
+
                 is SignUpException.InsecurePasswordException -> {
                     call.response.status(value = HttpStatusCode.BadRequest)
                     call.respondText(text = "Password is insecure.")
@@ -55,6 +56,7 @@ private fun Route.userRoutes() {
                     call.response.status(value = HttpStatusCode.Unauthorized)
                     call.respondText(text = "Email doesn't exist.")
                 }
+
                 is SignInException.InvalidPassword -> {
                     call.response.status(value = HttpStatusCode.Unauthorized)
                     call.respondText(text = "Invalid password.")
@@ -63,9 +65,10 @@ private fun Route.userRoutes() {
         }
     }
     post("/signOut") {
-        val response = call.executeAuthenticated<SignOut, SignOut.Request, SignOut.Response>(
-            request = call.receive<SignOut.Request>(),
-        )
+        val response =
+            call.executeAuthenticated<SignOut, SignOut.Request, SignOut.Response>(
+                request = call.receive<SignOut.Request>(),
+            )
         call.respond(message = response)
     }
 }
@@ -73,9 +76,10 @@ private fun Route.userRoutes() {
 private fun Route.dummyRoutes() {
     // Authenticated dummy API example
     post("/dummy") {
-        val response = call.executeAuthenticated<DummyApi, DummyApi.Request, DummyApi.Response>(
-            request = call.receive<DummyApi.Request>(),
-        )
+        val response =
+            call.executeAuthenticated<DummyApi, DummyApi.Request, DummyApi.Response>(
+                request = call.receive<DummyApi.Request>(),
+            )
         call.respond(message = response)
     }
 }

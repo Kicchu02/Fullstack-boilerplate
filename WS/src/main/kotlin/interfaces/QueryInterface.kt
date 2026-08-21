@@ -9,5 +9,8 @@ interface QueryInterface<I : QueryInput, R : QueryResult> {
 
     interface QueryResult
 
-    fun execute(ctx: DSLContext, input: I): R
+    fun execute(
+        ctx: DSLContext,
+        input: I,
+    ): R
 }

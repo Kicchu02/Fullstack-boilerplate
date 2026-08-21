@@ -22,7 +22,11 @@ abstract class ValidateWT : APIInterface<Request, Response> {
         val userIdentity: UserIdentity,
     ) : APIResponse
 
-    sealed class ValidateWTException(message: String? = null) : Exception(message) {
-        class InvalidWTException(message: String? = null) : ValidateWTException(message = message)
+    sealed class ValidateWTException(
+        message: String? = null,
+    ) : Exception(message) {
+        class InvalidWTException(
+            message: String? = null,
+        ) : ValidateWTException(message = message)
     }
 }

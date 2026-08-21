@@ -6,7 +6,14 @@ export const PageNotFoundPage = observer(() => {
   const navigate = useNavigateHelper();
 
   return (
-    <Stack height="100%" alignItems="center" justifyContent="center" gap={2}>
+    <Stack
+      sx={{
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
+      }}
+    >
       <Typography variant="h1">404</Typography>
       <Typography variant="h2">Page Not Found</Typography>
       <Button

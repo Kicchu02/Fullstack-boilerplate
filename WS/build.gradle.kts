@@ -24,7 +24,7 @@ plugins {
     id("org.flywaydb.flyway") version "9.22.0"
     id("nu.studer.jooq") version "8.2"
     id("com.diffplug.spotless") version "6.25.0"
-    kotlin("plugin.serialization") version "2.1.0"
+    alias(libs.plugins.kotlin.serialization)
 }
 
 group = "com.example"
@@ -63,7 +63,7 @@ dependencies {
     implementation("io.insert-koin:koin-core:3.5.0")
     implementation("io.insert-koin:koin-ktor:3.5.0")
     implementation("io.insert-koin:koin-logger-slf4j:3.5.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation(libs.kotlinx.serialization.json)
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.0")
     implementation("io.ktor:ktor-server-content-negotiation:3.1.0")
     implementation("io.ktor:ktor-server-cors")

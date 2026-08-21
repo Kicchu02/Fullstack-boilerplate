@@ -37,6 +37,8 @@ Every backend feature follows the same shape; use it as the template for new end
 2. **API implementation** (`<feature>/<Name>ServerImpl.kt`): implements the abstract class's `execute(request): response`, calling into one or more query interfaces.
 3. **Query contract** (`queries/abstractQueries/<Name>.kt`): implements `QueryInterface<Input, Result>` (`interfaces/QueryInterface.kt`) — `fun execute(ctx: DSLContext, input): result`.
 4. **Query implementation** (`queries/postgreSQL/<Name>Postgres.kt`): the JOOQ/SQL implementation of a query contract.
+DI note: only `koin-core` is on the classpath. Koin is started in `Application.kt`'s `main()` via `startKoin { modules(allModules) }`, and dependencies are resolved through `GlobalContext.get()` (see the `inject<T>()` helpers in `APIRoutingUtils.kt`) — **not** through Ktor's `install(Koin)` plugin. That is why `koin-ktor` and `koin-logger-slf4j` are deliberately absent; adding them back only makes sense as part of actually adopting the plugin, which means moving resolution off `GlobalContext` and threading the `ApplicationCall` through the call-scoped API.
+
 5. **Wiring** (`ServerModule.kt`): every API impl and query impl is registered in a Koin module (`routesModules`, `databaseModules`, `utilsModules`) — `single<Interface> { Impl() }` for stateless/singleton, `factory<Interface> { (param) -> Impl(param) }` when the impl needs a per-request value (e.g. `ApplicationCall`, `UserIdentity`).
 6. **Routing** (`Routing.kt`): each `Route` extension function (e.g. `userRoutes()`) `receive`s the request DTO, calls `inject<ApiInterface>()` (or `call.executeAuthenticated<...>()` for authenticated endpoints — see `APIRoutingUtils.kt`), and maps the sealed exception's subtypes to HTTP status codes in a `try/catch`.
 

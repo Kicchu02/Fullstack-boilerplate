@@ -43,8 +43,9 @@ fun main(args: Array<String>) {
     }.start(wait = true)
 }
 
-private val appModules = module {
-    single<Config> { config }
-}
+private val appModules =
+    module {
+        single<Config> { config }
+    }
 
 private val allModules = appModules + routesModules + databaseModules + utilsModules

@@ -14,8 +14,7 @@ import java.util.UUID
 
 inline fun <reified T> inject(): T = GlobalContext.get().get()
 
-inline fun <reified T> inject(vararg params: Any?): T =
-    GlobalContext.get().get { parametersOf(*params) }
+inline fun <reified T> inject(vararg params: Any?): T = GlobalContext.get().get { parametersOf(*params) }
 
 suspend fun ApplicationCall.requireWebToken(): UUID {
     val wt = request.cookies["WebToken"] ?: request.headers["WebToken"]
@@ -44,8 +43,9 @@ suspend fun ApplicationCall.validateAndGetUserIdentity(): UserIdentity {
     }
 }
 
-suspend inline fun <reified T : APIInterface<Req, Res>, Req : APIRequest, Res : APIResponse>
-    ApplicationCall.executeAuthenticated(request: Req): Res {
+suspend inline fun <reified T : APIInterface<Req, Res>, Req : APIRequest, Res : APIResponse> ApplicationCall.executeAuthenticated(
+    request: Req,
+): Res {
     val userIdentity = validateAndGetUserIdentity()
     val api = inject<T>(userIdentity)
     return api.execute(request)

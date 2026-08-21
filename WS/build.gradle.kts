@@ -23,7 +23,7 @@ plugins {
     alias(libs.plugins.ktor)
     id("org.flywaydb.flyway") version "9.22.0"
     id("nu.studer.jooq") version "8.2"
-    id("com.diffplug.spotless") version "6.25.0"
+    id("com.diffplug.spotless") version "8.10.0"
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -118,9 +118,9 @@ spotless {
     kotlin {
         target("**/*.kt")
         targetExclude("build/**", "jooq/**")
-        ktlint("0.50.0")
+        ktlint("1.8.0")
         trimTrailingWhitespace()
-        indentWithSpaces()
+        leadingTabsToSpaces()
         endWithNewline()
     }
 
@@ -128,7 +128,7 @@ spotless {
         target("*.gradle.kts")
         ktlint()
         trimTrailingWhitespace()
-        indentWithSpaces()
+        leadingTabsToSpaces()
         endWithNewline()
     }
 }

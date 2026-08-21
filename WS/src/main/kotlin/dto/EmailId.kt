@@ -14,8 +14,6 @@ data class EmailId(
     companion object {
         private val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
-        fun isValidEmail(email: String): Boolean {
-            return email.matches(emailRegex)
-        }
+        fun isValidEmail(email: String): Boolean = email.matches(emailRegex)
     }
 }

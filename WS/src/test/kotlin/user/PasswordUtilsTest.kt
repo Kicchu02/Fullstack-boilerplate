@@ -87,18 +87,18 @@ class PasswordUtilsTest {
         assertFalse(passwordUtils.isPasswordStrong("passw0rd!"), "no capital letter")
         assertFalse(passwordUtils.isPasswordStrong("Password!"), "no digit")
         assertFalse(passwordUtils.isPasswordStrong("Passw0rdd"), "no special character")
-        assertFalse(passwordUtils.isPasswordStrong("Pw0rd!"), "too short")
+        assertFalse(passwordUtils.isPasswordStrong("Pw0rd!"), "6 chars, too short")
         assertFalse(passwordUtils.isPasswordStrong(""), "empty")
     }
 
     @Test
-    fun `a password of exactly minimumLength is rejected, because the check is strictly greater than`() {
-        // Documents current behaviour rather than endorsing it: the policy key is called
-        // minimumLength and is set to 8, but isPasswordStrong tests `length > minimumLength`,
-        // so an otherwise-valid 8 character password is refused and 9 is the real minimum.
-        // If the off-by-one is ever fixed, this test should fail and be inverted.
+    fun `minimumLength is inclusive, so a password of exactly that length is accepted`() {
+        // Boundary case. This previously asserted the opposite: isPasswordStrong tested
+        // `length > minimumLength`, so an otherwise-valid 8 character password was refused
+        // even though the policy key is called minimumLength and is set to 8.
         assertEquals(8, "Passw0r!".length)
-        assertFalse(passwordUtils.isPasswordStrong("Passw0r!"))
+        assertTrue(passwordUtils.isPasswordStrong("Passw0r!"), "8 chars == minimumLength, must pass")
+        assertFalse(passwordUtils.isPasswordStrong("Pssw0r!"), "7 chars is below minimumLength")
         assertTrue(passwordUtils.isPasswordStrong("Passw0rd!"))
     }
 }

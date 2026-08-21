@@ -10,22 +10,36 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { observer } from "mobx-react-lite";
 import React, { useState } from "react";
-import { showPopup } from "../helpers";
 import { useNavigateHelper } from "../RoutesHelper";
-import { useSignUpPageStore } from "../stores/hooks";
+import {
+  selectIsAPIErrored,
+  selectIsButtonDisabled,
+  useSignUpPageStore,
+} from "../stores/SignUpPageStore";
+import { showPopup } from "../stores/UiStore";
 
-export const SignUpPage = observer((): React.ReactElement => {
+export const SignUpPage = (): React.ReactElement => {
   const navigateHelper = useNavigateHelper();
-  const signUpPageStore = useSignUpPageStore();
   const [showPassword, setShowPassword] = useState(false);
+
+  const email = useSignUpPageStore((s) => s.email);
+  const password = useSignUpPageStore((s) => s.password);
+  const isLoading = useSignUpPageStore((s) => s.isLoading);
+  const isEmailAlreadyExists = useSignUpPageStore((s) => s.isEmailAlreadyExists);
+  const isEmailInvalid = useSignUpPageStore((s) => s.isEmailInvalid);
+  const isPasswordInvalid = useSignUpPageStore((s) => s.isPasswordInvalid);
+  const isButtonDisabled = useSignUpPageStore(selectIsButtonDisabled);
+  const setEmail = useSignUpPageStore((s) => s.setEmail);
+  const setPassword = useSignUpPageStore((s) => s.setPassword);
+  const signUp = useSignUpPageStore((s) => s.signUp);
+  const reset = useSignUpPageStore((s) => s.reset);
 
   return (
     <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
       <Stack sx={{ gap: 4, width: "400px", alignItems: "center" }}>
         <Typography variant="h4">Sign Up</Typography>
-        {signUpPageStore.isEmailAlreadyExists && (
+        {isEmailAlreadyExists && (
           <Stack sx={{ width: "100%" }}>
             <Alert severity="error">This email is already in use</Alert>
           </Stack>
@@ -35,29 +49,26 @@ export const SignUpPage = observer((): React.ReactElement => {
           type="email"
           fullWidth
           required
-          value={signUpPageStore.email}
-          onChange={(e) => signUpPageStore.setEmail(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           error={
-            signUpPageStore.isEmailInvalid ||
-            signUpPageStore.isEmailAlreadyExists
+            isEmailInvalid || isEmailAlreadyExists
           }
           helperText={
-            signUpPageStore.isEmailInvalid ? "Invalid email" : undefined
+            isEmailInvalid ? "Invalid email" : undefined
           }
-          disabled={signUpPageStore.isLoading}
+          disabled={isLoading}
         />
         <TextField
           label="Password"
           type={showPassword ? "text" : "password"}
           fullWidth
           required
-          value={signUpPageStore.password}
-          onChange={(e) => signUpPageStore.setPassword(e.target.value)}
-          error={signUpPageStore.isPasswordInvalid}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={isPasswordInvalid}
           helperText={
-            signUpPageStore.isPasswordInvalid
-              ? "Password is insecure"
-              : undefined
+            isPasswordInvalid ? "Password is insecure" : undefined
           }
           slotProps={{
             input: {
@@ -65,7 +76,7 @@ export const SignUpPage = observer((): React.ReactElement => {
                 <InputAdornment position="end">
                   <IconButton
                     onClick={() => setShowPassword(!showPassword)}
-                    disabled={signUpPageStore.isLoading}
+                    disabled={isLoading}
                   >
                     {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                   </IconButton>
@@ -73,23 +84,23 @@ export const SignUpPage = observer((): React.ReactElement => {
               ),
             },
           }}
-          disabled={signUpPageStore.isLoading}
+          disabled={isLoading}
         />
         <Button
           variant="contained"
           fullWidth
           size="large"
-          disabled={signUpPageStore.isButtonDisabled}
+          disabled={isButtonDisabled}
           onClick={async () => {
-            await signUpPageStore.signUp();
-            if (signUpPageStore.isAPIErrored) {
+            await signUp();
+            if (selectIsAPIErrored(useSignUpPageStore.getState())) {
               return;
             }
-            showPopup(signUpPageStore, "Sign up successful", "success");
-            signUpPageStore.reset();
+            showPopup("Sign up successful", "success");
+            reset();
             navigateHelper.navigateToSignIn();
           }}
-          loading={signUpPageStore.isLoading}
+          loading={isLoading}
         >
           Sign Up
         </Button>
@@ -97,10 +108,10 @@ export const SignUpPage = observer((): React.ReactElement => {
           Already have an account?{" "}
           <Link
             onClick={() => {
-              if (signUpPageStore.isLoading) {
+              if (isLoading) {
                 return;
               }
-              signUpPageStore.reset();
+              reset();
               navigateHelper.navigateToSignIn();
             }}
             style={{ cursor: "pointer" }}
@@ -111,4 +122,4 @@ export const SignUpPage = observer((): React.ReactElement => {
       </Stack>
     </Stack>
   );
-});
+};

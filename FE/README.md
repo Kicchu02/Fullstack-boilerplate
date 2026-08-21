@@ -60,6 +60,8 @@ Tests run on [Vitest](https://vitest.dev/) in a `jsdom` environment, with
 need no backend and no database — API calls are mocked.
 
 Test files live next to the code they cover, as `*.test.ts` / `*.test.tsx`. Shared test
-setup is in `src/test/`: `setup.ts` registers the `jest-dom` matchers and Testing Library
-cleanup, and `renderWithProviders.tsx` wraps a component in the MST root store and a
-router, which is what pages need in order to render at all.
+setup is in `src/test/`: `setup.ts` registers the `jest-dom` matchers, Testing Library
+cleanup and a reset of the Zustand stores between tests; `renderWithProviders.tsx` wraps a
+component in a router (which pages need in order to render at all) and exposes the current
+path so navigation can be asserted; `deferred.ts` gives a test control over when a mocked
+request resolves, for asserting on in-flight states.

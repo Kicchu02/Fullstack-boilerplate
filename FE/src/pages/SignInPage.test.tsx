@@ -37,7 +37,7 @@ describe("SignInPage", () => {
     const email = screen.getByLabelText(/email/i);
     await user.type(email, "someone@example.com");
 
-    // Controlled inputs bound straight to MST fields: if the observer wiring breaks,
+    // Controlled inputs bound straight to store fields: if the subscription breaks,
     // the value never appears.
     expect(email).toHaveValue("someone@example.com");
   });

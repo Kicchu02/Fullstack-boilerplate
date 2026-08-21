@@ -1,21 +1,27 @@
 import { Button, CircularProgress, Stack, Typography } from "@mui/material";
-import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { useNavigateHelper } from "../RoutesHelper";
-import { useHomePageStore } from "../stores/hooks";
+import { useHomePageStore } from "../stores/HomePageStore";
 
-export const HomePage = observer((): React.ReactElement => {
-  const homePageStore = useHomePageStore();
+export const HomePage = (): React.ReactElement => {
   const navigateHelper = useNavigateHelper();
+  const isLoading = useHomePageStore((s) => s.isLoading);
+  const dummyData = useHomePageStore((s) => s.dummyData);
+  const isSignOutLoading = useHomePageStore((s) => s.isSignOutLoading);
+  const dummyAPI = useHomePageStore((s) => s.dummyAPI);
+  const signOut = useHomePageStore((s) => s.signOut);
+  const reset = useHomePageStore((s) => s.reset);
 
+  // Zustand actions keep a stable identity for the life of the store, so depending on
+  // them here does not re-fire the effect. Depending on the store object itself would.
   useEffect(() => {
-    homePageStore.dummyAPI();
-    return homePageStore.reset;
-  }, [homePageStore]);
+    void dummyAPI();
+    return reset;
+  }, [dummyAPI, reset]);
 
   return (
     <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
-      {homePageStore.isLoading ? (
+      {isLoading ? (
         <CircularProgress />
       ) : (
         <Stack
@@ -28,14 +34,14 @@ export const HomePage = observer((): React.ReactElement => {
             p: 2,
           }}
         >
-          <Typography variant="subtitle1">{homePageStore.dummyData}</Typography>
+          <Typography variant="subtitle1">{dummyData}</Typography>
           <Button
             variant="contained"
             color="error"
-            loading={homePageStore.isSignOutLoading}
+            loading={isSignOutLoading}
             onClick={async () => {
-              await homePageStore.signOut();
-              homePageStore.reset();
+              await signOut();
+              reset();
               navigateHelper.navigateToSignIn();
             }}
           >
@@ -45,4 +51,4 @@ export const HomePage = observer((): React.ReactElement => {
       )}
     </Stack>
   );
-});
+};

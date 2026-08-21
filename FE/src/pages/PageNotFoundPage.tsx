@@ -1,8 +1,8 @@
 import { Button, Stack, Typography } from "@mui/material";
-import { observer } from "mobx-react-lite";
+import type React from "react";
 import { useNavigateHelper } from "../RoutesHelper";
 
-export const PageNotFoundPage = observer(() => {
+export const PageNotFoundPage = (): React.ReactElement => {
   const navigate = useNavigateHelper();
 
   return (
@@ -27,4 +27,4 @@ export const PageNotFoundPage = observer(() => {
       </Button>
     </Stack>
   );
-});
+};

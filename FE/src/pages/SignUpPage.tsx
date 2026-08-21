@@ -1,16 +1,5 @@
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import {
-  Alert,
-  Button,
-  IconButton,
-  InputAdornment,
-  Link,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import React, { useState } from "react";
+import { Alert, Button, Flex, Input, Typography } from "antd";
+import type React from "react";
 import { useNavigateHelper } from "../RoutesHelper";
 import {
   selectIsAPIErrored,
@@ -21,7 +10,6 @@ import { showPopup } from "../stores/UiStore";
 
 export const SignUpPage = (): React.ReactElement => {
   const navigateHelper = useNavigateHelper();
-  const [showPassword, setShowPassword] = useState(false);
 
   const email = useSignUpPageStore((s) => s.email);
   const password = useSignUpPageStore((s) => s.password);
@@ -36,67 +24,70 @@ export const SignUpPage = (): React.ReactElement => {
   const reset = useSignUpPageStore((s) => s.reset);
 
   return (
-    <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
-      <Stack sx={{ gap: 4, width: "400px", alignItems: "center" }}>
-        <Typography variant="h4">Sign Up</Typography>
+    <Flex align="center" justify="center" style={{ height: "100%" }}>
+      <Flex vertical gap={24} align="center" style={{ width: 400 }}>
+        <Typography.Title level={4} style={{ marginBottom: 0 }}>
+          Sign Up
+        </Typography.Title>
+
         {isEmailAlreadyExists && (
-          <Stack sx={{ width: "100%" }}>
-            <Alert severity="error">This email is already in use</Alert>
-          </Stack>
+          <Alert
+            style={{ width: "100%" }}
+            type="error"
+            message="This email is already in use"
+            showIcon
+          />
         )}
-        <TextField
-          label="Email"
-          type="email"
-          fullWidth
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={
-            isEmailInvalid || isEmailAlreadyExists
-          }
-          helperText={
-            isEmailInvalid ? "Invalid email" : undefined
-          }
-          disabled={isLoading}
-        />
-        <TextField
-          label="Password"
-          type={showPassword ? "text" : "password"}
-          fullWidth
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={isPasswordInvalid}
-          helperText={
-            isPasswordInvalid ? "Password is insecure" : undefined
-          }
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
-                  >
-                    {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
-          disabled={isLoading}
-        />
+
+        <Flex vertical gap={4} style={{ width: "100%" }}>
+          <label htmlFor="signUpEmail">Email</label>
+          <Input
+            id="signUpEmail"
+            required
+            aria-invalid={isEmailInvalid || undefined}
+            aria-describedby={isEmailInvalid ? "signUpEmailError" : undefined}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            status={isEmailInvalid || isEmailAlreadyExists ? "error" : undefined}
+            disabled={isLoading}
+          />
+          {isEmailInvalid && (
+            <Typography.Text id="signUpEmailError" type="danger">
+              Invalid email
+            </Typography.Text>
+          )}
+        </Flex>
+
+        <Flex vertical gap={4} style={{ width: "100%" }}>
+          <label htmlFor="signUpPassword">Password</label>
+          <Input.Password
+            id="signUpPassword"
+            required
+            aria-invalid={isPasswordInvalid || undefined}
+            aria-describedby={isPasswordInvalid ? "signUpPasswordError" : undefined}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            status={isPasswordInvalid ? "error" : undefined}
+            disabled={isLoading}
+          />
+          {isPasswordInvalid && (
+            <Typography.Text id="signUpPasswordError" type="danger">
+              Password is insecure
+            </Typography.Text>
+          )}
+        </Flex>
+
         <Button
-          variant="contained"
-          fullWidth
+          type="primary"
           size="large"
+          block
           disabled={isButtonDisabled}
+          loading={isLoading}
           onClick={async () => {
             await signUp();
             const state = useSignUpPageStore.getState();
             if (state.hasRequestFailed) {
-              // Nothing on the form explains this one, so say so rather than leaving the
-              // user staring at a button that stopped spinning.
               showPopup("Something went wrong. Please try again.", "error");
               return;
             }
@@ -107,13 +98,13 @@ export const SignUpPage = (): React.ReactElement => {
             reset();
             navigateHelper.navigateToSignIn();
           }}
-          loading={isLoading}
         >
           Sign Up
         </Button>
-        <Typography variant="body2">
+
+        <Typography.Text>
           Already have an account?{" "}
-          <Link
+          <Typography.Link
             onClick={() => {
               if (isLoading) {
                 return;
@@ -121,12 +112,11 @@ export const SignUpPage = (): React.ReactElement => {
               reset();
               navigateHelper.navigateToSignIn();
             }}
-            style={{ cursor: "pointer" }}
           >
             Sign In
-          </Link>
-        </Typography>
-      </Stack>
-    </Stack>
+          </Typography.Link>
+        </Typography.Text>
+      </Flex>
+    </Flex>
   );
 };

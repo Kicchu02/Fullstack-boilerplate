@@ -1,4 +1,4 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Button, Flex, Typography } from "antd";
 import type React from "react";
 import { useNavigateHelper } from "../RoutesHelper";
 
@@ -6,23 +6,22 @@ export const ErrorPage = (): React.ReactElement => {
   const navigateHelper = useNavigateHelper();
 
   return (
-    <Stack
-      sx={{
-        height: "100%",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 2,
-      }}
+    <Flex
+      vertical
+      align="center"
+      justify="center"
+      gap={16}
+      style={{ height: "100%" }}
     >
-      <Typography variant="h1">500</Typography>
-      <Typography variant="h2">Internal Server Error</Typography>
-      <Button
-        variant="outlined"
-        size="large"
-        onClick={() => navigateHelper.navigateToHome()}
-      >
+      <Typography.Title level={1} style={{ marginBottom: 0 }}>
+        500
+      </Typography.Title>
+      <Typography.Title level={2} style={{ marginTop: 0 }}>
+        Internal Server Error
+      </Typography.Title>
+      <Button size="large" onClick={() => navigateHelper.navigateToHome()}>
         Go to Home
       </Button>
-    </Stack>
+    </Flex>
   );
 };

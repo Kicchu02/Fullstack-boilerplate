@@ -1,15 +1,5 @@
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import {
-  Button,
-  IconButton,
-  InputAdornment,
-  Link,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
-import React, { useState } from "react";
+import { Button, Flex, Input, Typography } from "antd";
+import type React from "react";
 import { useNavigateHelper } from "../RoutesHelper";
 import {
   selectIsAPIErrored,
@@ -20,7 +10,6 @@ import { showPopup } from "../stores/UiStore";
 
 export const SignInPage = (): React.ReactElement => {
   const navigateHelper = useNavigateHelper();
-  const [showPassword, setShowPassword] = useState(false);
 
   const email = useSignInPageStore((s) => s.email);
   const password = useSignInPageStore((s) => s.password);
@@ -34,54 +23,65 @@ export const SignInPage = (): React.ReactElement => {
   const reset = useSignInPageStore((s) => s.reset);
 
   return (
-    <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
-      <Stack sx={{ gap: 4, width: "400px", alignItems: "center" }}>
-        <Typography variant="h4">Sign In</Typography>
-        <TextField
-          label="Email"
-          type="email"
-          fullWidth
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={isEmailInvalid}
-          helperText={
-            isEmailInvalid ? "Invalid email" : undefined
-          }
-          disabled={isLoading}
-        />
-        <TextField
-          label="Password"
-          type={showPassword ? "text" : "password"}
-          fullWidth
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={isPasswordInvalid}
-          helperText={
-            isPasswordInvalid ? "Invalid password" : undefined
-          }
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
-                    disabled={isLoading}
-                  >
-                    {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
-          disabled={isLoading}
-        />
+    <Flex align="center" justify="center" style={{ height: "100%" }}>
+      <Flex vertical gap={24} align="center" style={{ width: 400 }}>
+        <Typography.Title level={4} style={{ marginBottom: 0 }}>
+          Sign In
+        </Typography.Title>
+
+        {/*
+          Plain label + id rather than antd's Form/Form.Item. These inputs are controlled
+          straight from the store, so antd Form's own field state would be a second source
+          of truth for the same values. The explicit htmlFor/id pairing is also what keeps
+          the fields reachable by label for assistive tech and for tests.
+        */}
+        <Flex vertical gap={4} style={{ width: "100%" }}>
+          <label htmlFor="signInEmail">Email</label>
+          <Input
+            id="signInEmail"
+            required
+            aria-invalid={isEmailInvalid || undefined}
+            aria-describedby={isEmailInvalid ? "signInEmailError" : undefined}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            status={isEmailInvalid ? "error" : undefined}
+            disabled={isLoading}
+          />
+          {isEmailInvalid && (
+            <Typography.Text id="signInEmailError" type="danger">
+              Invalid email
+            </Typography.Text>
+          )}
+        </Flex>
+
+        <Flex vertical gap={4} style={{ width: "100%" }}>
+          <label htmlFor="signInPassword">Password</label>
+          {/* Input.Password brings its own show/hide toggle, so the IconButton +
+              InputAdornment + Visibility icon trio this used to need is gone. */}
+          <Input.Password
+            id="signInPassword"
+            required
+            aria-invalid={isPasswordInvalid || undefined}
+            aria-describedby={isPasswordInvalid ? "signInPasswordError" : undefined}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            status={isPasswordInvalid ? "error" : undefined}
+            disabled={isLoading}
+          />
+          {isPasswordInvalid && (
+            <Typography.Text id="signInPasswordError" type="danger">
+              Invalid password
+            </Typography.Text>
+          )}
+        </Flex>
+
         <Button
-          variant="contained"
-          fullWidth
+          type="primary"
           size="large"
+          block
           disabled={isButtonDisabled}
+          loading={isLoading}
           onClick={async () => {
             await signIn();
             const state = useSignInPageStore.getState();
@@ -98,13 +98,13 @@ export const SignInPage = (): React.ReactElement => {
             reset();
             navigateHelper.navigateToHome();
           }}
-          loading={isLoading}
         >
           Sign In
         </Button>
-        <Typography variant="body2">
-          Don't have an account?{" "}
-          <Link
+
+        <Typography.Text>
+          Don&apos;t have an account?{" "}
+          <Typography.Link
             onClick={() => {
               if (isLoading) {
                 return;
@@ -112,12 +112,11 @@ export const SignInPage = (): React.ReactElement => {
               reset();
               navigateHelper.navigateToSignUp();
             }}
-            style={{ cursor: "pointer" }}
           >
             Sign Up
-          </Link>
-        </Typography>
-      </Stack>
-    </Stack>
+          </Typography.Link>
+        </Typography.Text>
+      </Flex>
+    </Flex>
   );
 };

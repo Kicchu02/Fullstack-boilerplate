@@ -49,4 +49,14 @@ export default tseslint.config([
       ],
     },
   },
+  {
+    // Test files and test-only helpers are never part of the Fast Refresh graph, so
+    // react-refresh's rules cannot apply to them. src/test/renderWithProviders.tsx
+    // legitimately exports a render helper and a test-id constant alongside a small
+    // probe component, which the rule reads as a mixed-export component module.
+    files: ['**/*.{test,spec}.{ts,tsx}', 'src/test/**/*.{ts,tsx}'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])

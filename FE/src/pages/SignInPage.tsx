@@ -21,8 +21,8 @@ export const SignInPage = observer((): React.ReactElement => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <Stack height="100%" alignItems="center" justifyContent="center">
-      <Stack gap={4} width="400px" alignItems="center">
+    <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
+      <Stack sx={{ gap: 4, width: "400px", alignItems: "center" }}>
         <Typography variant="h4">Sign In</Typography>
         <TextField
           label="Email"

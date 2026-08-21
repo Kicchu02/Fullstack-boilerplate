@@ -7,7 +7,14 @@ export const ErrorPage = observer((): React.ReactElement => {
   const navigateHelper = useNavigateHelper();
 
   return (
-    <Stack height="100%" alignItems="center" justifyContent="center" gap={2}>
+    <Stack
+      sx={{
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
+      }}
+    >
       <Typography variant="h1">500</Typography>
       <Typography variant="h2">Internal Server Error</Typography>
       <Button

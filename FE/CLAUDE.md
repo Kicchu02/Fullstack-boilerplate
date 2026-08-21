@@ -23,6 +23,21 @@ multiple elements". `src/test/renderWithProviders.tsx` wraps a component in
 
 This frontend talks to the WS backend at `http://localhost:8080` (see `src/constants.ts`'s `BASE_URL`) — see `../WS/CLAUDE.md` to run it. The tests do not need it running.
 
+## Deliberate version ceilings
+
+Two dependencies are intentionally **not** on their latest published version. Both were
+verified against the registry, and bumping either breaks the build — so check here before
+"helpfully" upgrading them.
+
+- **mobx stays on 6.x.** `mobx-state-tree@7.3.2` is the latest release and declares
+  `peerDependencies: { mobx: "^6.3.0" }`. Every store in `src/stores/` is built on MST, so
+  mobx 7 is not available until MST supports it. `mobx-react-lite` is pinned to 4.x for the
+  same reason — its 5.x line requires `mobx ^7.0.0`.
+- **TypeScript stays on 6.0.x.** `typescript-eslint@8.67.0` is the latest release (there is
+  no 9.x) and declares `typescript: ">=4.8.4 <6.1.0"`. TypeScript 7 (the Go port) is
+  published, but `npm run lint` is what pins this. Lifting it means waiting for
+  typescript-eslint to support TS 7, or replacing typescript-eslint.
+
 ## Architecture
 
 State management is **MobX-State-Tree (MST)**, not Redux/Zustand/Context-alone:

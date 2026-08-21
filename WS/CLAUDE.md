@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stack
 
-Kotlin 2.1 + Ktor 3.1 (Netty engine), JOOQ (typed SQL, codegen from DB schema) + Flyway (migrations), PostgreSQL, Koin (DI), kotlinx.serialization. Single Gradle module, package root `com.example`. Serves on port 8080; the FE dev server (`../FE`) expects it there.
+Kotlin 2.4 + Ktor 3.5 (Netty engine), JOOQ 3.21 (typed SQL, codegen from DB schema) + Flyway 13 (migrations), PostgreSQL 18, Koin 4 (DI), kotlinx.serialization. Single Gradle module, package root `com.example`. Serves on port 8080; the FE dev server (`../FE`) expects it there.
+
+Every version lives in [`gradle/libs.versions.toml`](gradle/libs.versions.toml) — plugins included. The only exceptions are the two `classpath(...)` literals in `build.gradle.kts`'s `buildscript {}` block, because Gradle does not expose the catalog there; both carry comments naming the catalog keys they have to track. Add new dependencies to the catalog rather than inline.
 
 Java is pinned to Temurin 25 in `../.mise.toml`, and `build.gradle.kts` declares `kotlin { jvmToolchain(25) }`. The two must move together: the mise pin decides which JDK Gradle *runs* on, the toolchain decides what bytecode it *emits*, and letting them drift means the build silently compiles for one target on another runtime. Java 25 emits class file major version 69 — a quick way to confirm the toolchain is actually in effect rather than cosmetic.
 

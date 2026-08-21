@@ -13,6 +13,9 @@ val dbPassword: String = dbConfig.getString("password")
 val dbUrl = "jdbc:postgresql://$dbHost:$dbPort/$dbName"
 
 buildscript {
+    // Gradle does not expose the version catalog inside buildscript {}, so these two are
+    // the only version literals left in this file. Keep them in step with
+    // typesafe-config-version and flyway-version in gradle/libs.versions.toml.
     dependencies {
         classpath("com.typesafe:config:1.4.9")
         classpath("org.flywaydb:flyway-database-postgresql:13.3.0")
@@ -22,14 +25,25 @@ buildscript {
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
-    id("org.flywaydb.flyway") version "13.3.0"
-    id("nu.studer.jooq") version "10.2.1"
-    id("com.diffplug.spotless") version "8.10.0"
+    alias(libs.plugins.flyway)
+    alias(libs.plugins.jooq)
+    alias(libs.plugins.spotless)
     alias(libs.plugins.kotlin.serialization)
 }
 
 group = "com.example"
 version = "0.0.1"
+
+// Read out of the version catalog into locals, because the jooq{} and spotless{} blocks
+// below take a plain String rather than a plugin alias. The catalog remains the single
+// source of truth. (ktlint's chain-method-continuation rule is what splits these
+// accessors across lines; it is the formatter's call, not a style choice made here.)
+val jooqVersion =
+    libs.versions.jooq.version
+        .get()
+val ktlintVersion =
+    libs.versions.ktlint.version
+        .get()
 
 // Pins the compile target instead of inheriting whatever JDK is on PATH, so the
 // bytecode a clone produces doesn't depend on the developer's shell. Keep this in
@@ -88,7 +102,7 @@ flyway {
 }
 
 jooq {
-    version.set("3.21.7")
+    version.set(jooqVersion)
     configurations {
         create("main") {
             generateSchemaSourceOnCompilation.set(false)
@@ -136,7 +150,7 @@ spotless {
     kotlin {
         target("**/*.kt")
         targetExclude("build/**", "jooq/**")
-        ktlint("1.8.0")
+        ktlint(ktlintVersion)
         trimTrailingWhitespace()
         leadingTabsToSpaces()
         endWithNewline()
@@ -144,7 +158,7 @@ spotless {
 
     kotlinGradle {
         target("*.gradle.kts")
-        ktlint()
+        ktlint(ktlintVersion)
         trimTrailingWhitespace()
         leadingTabsToSpaces()
         endWithNewline()

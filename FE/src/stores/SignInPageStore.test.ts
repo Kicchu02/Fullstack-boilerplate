@@ -1,14 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { WEB_TOKEN_COOKIE_NAME } from "../constants";
-import { createSignInPageStore } from "./SignInPageStore";
+import {
+  selectIsAPIErrored,
+  selectIsButtonDisabled,
+  useSignInPageStore,
+} from "./SignInPageStore";
 
 // Mock only postAPI, keeping the rest of helpers real, so the store's error branches can
-// be driven without a backend while showPopup and friends stay untouched.
+// be driven without a backend.
 const { postAPI } = vi.hoisted(() => ({ postAPI: vi.fn() }));
 vi.mock("../helpers", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../helpers")>()),
   postAPI,
 }));
+
+// The store is a module singleton, so these read and write it directly via getState()
+// rather than creating an instance. setup.ts resets every store after each test.
+const store = () => useSignInPageStore.getState();
 
 describe("SignInPageStore", () => {
   beforeEach(() => {
@@ -16,69 +24,64 @@ describe("SignInPageStore", () => {
     localStorage.clear();
   });
 
-  describe("isButtonDisabled", () => {
+  describe("selectIsButtonDisabled", () => {
     it("is disabled until both fields have content", () => {
-      const store = createSignInPageStore();
-      expect(store.isButtonDisabled).toBe(true);
+      expect(selectIsButtonDisabled(store())).toBe(true);
 
-      store.setEmail("a@b.com");
-      expect(store.isButtonDisabled).toBe(true);
+      store().setEmail("a@b.com");
+      expect(selectIsButtonDisabled(store())).toBe(true);
 
-      store.setPassword("Passw0rd!");
-      expect(store.isButtonDisabled).toBe(false);
+      store().setPassword("Passw0rd!");
+      expect(selectIsButtonDisabled(store())).toBe(false);
     });
 
     it("treats whitespace-only input as empty", () => {
-      const store = createSignInPageStore();
-      store.setEmail("   ");
-      store.setPassword("\t ");
-      expect(store.isButtonDisabled).toBe(true);
+      store().setEmail("   ");
+      store().setPassword("\t ");
+      expect(selectIsButtonDisabled(store())).toBe(true);
     });
   });
 
-  it("reset() restores the snapshot captured in afterCreate", () => {
-    const store = createSignInPageStore();
-    store.setEmail("a@b.com");
-    store.setPassword("Passw0rd!");
+  it("reset() restores the initial state", () => {
+    store().setEmail("a@b.com");
+    store().setPassword("Passw0rd!");
 
-    store.reset();
+    store().reset();
 
-    expect(store.email).toBe("");
-    expect(store.password).toBe("");
-    expect(store.isButtonDisabled).toBe(true);
+    expect(store().email).toBe("");
+    expect(store().password).toBe("");
+    expect(selectIsButtonDisabled(store())).toBe(true);
   });
 
   it("stores the web token on a successful sign in", async () => {
     postAPI.mockResolvedValue({ data: { webToken: "token-123" } });
-    const store = createSignInPageStore();
-    store.setEmail("a@b.com");
-    store.setPassword("Passw0rd!");
+    store().setEmail("a@b.com");
+    store().setPassword("Passw0rd!");
 
-    await store.signIn();
+    await store().signIn();
 
     expect(postAPI).toHaveBeenCalledWith("/user/signIn", {
       emailId: { emailId: "a@b.com" },
       password: "Passw0rd!",
     });
     expect(localStorage.getItem(WEB_TOKEN_COOKIE_NAME)).toBe("token-123");
-    expect(store.isLoading).toBe(false);
-    expect(store.isAPIErrored).toBe(false);
+    expect(store().isLoading).toBe(false);
+    expect(selectIsAPIErrored(store())).toBe(false);
   });
 
   it("flags the email field when the backend says the email does not exist", async () => {
     postAPI.mockRejectedValue({
       response: { status: 401, data: "Email doesn't exist." },
     });
-    const store = createSignInPageStore();
-    store.setEmail("nobody@b.com");
-    store.setPassword("Passw0rd!");
+    store().setEmail("nobody@b.com");
+    store().setPassword("Passw0rd!");
 
-    await store.signIn();
+    await store().signIn();
 
-    expect(store.isEmailInvalid).toBe(true);
-    expect(store.isPasswordInvalid).toBe(false);
-    expect(store.isAPIErrored).toBe(true);
-    expect(store.isLoading).toBe(false);
+    expect(store().isEmailInvalid).toBe(true);
+    expect(store().isPasswordInvalid).toBe(false);
+    expect(selectIsAPIErrored(store())).toBe(true);
+    expect(store().isLoading).toBe(false);
     expect(localStorage.getItem(WEB_TOKEN_COOKIE_NAME)).toBeNull();
   });
 
@@ -86,32 +89,84 @@ describe("SignInPageStore", () => {
     postAPI.mockRejectedValue({
       response: { status: 401, data: "Invalid password." },
     });
-    const store = createSignInPageStore();
-    store.setEmail("a@b.com");
-    store.setPassword("wrong");
+    store().setEmail("a@b.com");
+    store().setPassword("wrong");
 
-    await store.signIn();
+    await store().signIn();
 
-    expect(store.isPasswordInvalid).toBe(true);
-    expect(store.isEmailInvalid).toBe(false);
-    expect(store.isAPIErrored).toBe(true);
+    expect(store().isPasswordInvalid).toBe(true);
+    expect(store().isEmailInvalid).toBe(false);
+    expect(selectIsAPIErrored(store())).toBe(true);
   });
 
   it("clears a previous error before retrying", async () => {
     postAPI.mockRejectedValueOnce({
       response: { status: 401, data: "Invalid password." },
     });
-    const store = createSignInPageStore();
-    store.setEmail("a@b.com");
-    store.setPassword("wrong");
-    await store.signIn();
-    expect(store.isPasswordInvalid).toBe(true);
+    store().setEmail("a@b.com");
+    store().setPassword("wrong");
+    await store().signIn();
+    expect(store().isPasswordInvalid).toBe(true);
 
     postAPI.mockResolvedValueOnce({ data: { webToken: "token-456" } });
-    store.setPassword("Passw0rd!");
-    await store.signIn();
+    store().setPassword("Passw0rd!");
+    await store().signIn();
 
-    expect(store.isPasswordInvalid).toBe(false);
-    expect(store.isAPIErrored).toBe(false);
+    expect(store().isPasswordInvalid).toBe(false);
+    expect(selectIsAPIErrored(store())).toBe(false);
+  });
+
+  it("treats a network failure with no response as an error, not a success", async () => {
+    // No `response` on the error, which is what axios gives when the backend is
+    // unreachable. Previously nothing was flagged, so callers read this as success.
+    postAPI.mockRejectedValue(new Error("Network Error"));
+    store().setEmail("a@b.com");
+    store().setPassword("Passw0rd!");
+
+    await store().signIn();
+
+    expect(store().hasRequestFailed).toBe(true);
+    expect(selectIsAPIErrored(store())).toBe(true);
+    expect(localStorage.getItem(WEB_TOKEN_COOKIE_NAME)).toBeNull();
+    expect(store().isLoading).toBe(false);
+  });
+
+  it("treats an unhandled status as an error, not a success", async () => {
+    postAPI.mockRejectedValue({ response: { status: 500, data: "boom" } });
+    store().setEmail("a@b.com");
+    store().setPassword("Passw0rd!");
+
+    await store().signIn();
+
+    expect(selectIsAPIErrored(store())).toBe(true);
+    expect(localStorage.getItem(WEB_TOKEN_COOKIE_NAME)).toBeNull();
+  });
+
+  it("clears hasRequestFailed on a later successful attempt", async () => {
+    postAPI.mockRejectedValueOnce(new Error("Network Error"));
+    store().setEmail("a@b.com");
+    store().setPassword("Passw0rd!");
+    await store().signIn();
+    expect(store().hasRequestFailed).toBe(true);
+
+    postAPI.mockResolvedValueOnce({ data: { webToken: "token-789" } });
+    await store().signIn();
+
+    expect(store().hasRequestFailed).toBe(false);
+    expect(selectIsAPIErrored(store())).toBe(false);
+  });
+
+  it("sets isLoading while the request is in flight", async () => {
+    let release!: (v: unknown) => void;
+    postAPI.mockReturnValue(new Promise((r) => (release = r)));
+    store().setEmail("a@b.com");
+    store().setPassword("Passw0rd!");
+
+    const pending = store().signIn();
+    expect(store().isLoading).toBe(true);
+
+    release({ data: { webToken: "t" } });
+    await pending;
+    expect(store().isLoading).toBe(false);
   });
 });

@@ -1,6 +1,10 @@
 # React Sample Project
 
-This is a React + TypeScript + Vite project with routing and state management.
+This is a React + TypeScript + Vite project.
+
+**Stack:** React 19, TypeScript, Vite 8, [Ant Design](https://ant.design/) v6 for UI,
+[Zustand](https://zustand.docs.pmnd.rs/) for state, React Router for routing, axios for
+HTTP, and Vitest + React Testing Library for tests.
 
 This project is worked on standalone — everything you need to set it up and run it is in this README.
 
@@ -53,6 +57,16 @@ npm test           # run the test suite once
 npm run test:watch # run the tests in watch mode
 ```
 
+## Verifying the whole frontend
+
+```bash
+./scripts/verify.sh
+```
+
+Runs `npm ci` (which is also the check that `package.json` and `package-lock.json` still agree), the type-checked production build, ESLint, the test suite, and then serves the build with `vite preview` and fetches every emitted JavaScript chunk. Prints a pass/fail summary.
+
+It uses port `3000`; if something is already listening there it stops rather than testing whatever that is — Vite would otherwise silently fall back to another port.
+
 ## Tests
 
 Tests run on [Vitest](https://vitest.dev/) in a `jsdom` environment, with
@@ -60,6 +74,8 @@ Tests run on [Vitest](https://vitest.dev/) in a `jsdom` environment, with
 need no backend and no database — API calls are mocked.
 
 Test files live next to the code they cover, as `*.test.ts` / `*.test.tsx`. Shared test
-setup is in `src/test/`: `setup.ts` registers the `jest-dom` matchers and Testing Library
-cleanup, and `renderWithProviders.tsx` wraps a component in the MST root store and a
-router, which is what pages need in order to render at all.
+setup is in `src/test/`: `setup.ts` registers the `jest-dom` matchers, Testing Library
+cleanup and a reset of the Zustand stores between tests; `renderWithProviders.tsx` wraps a
+component in a router (which pages need in order to render at all) and exposes the current
+path so navigation can be asserted; `deferred.ts` gives a test control over when a mocked
+request resolves, for asserting on in-flight states.

@@ -101,6 +101,16 @@ To run the packaged build instead:
 ./gradlew build
 ```
 
+## Verifying the whole backend
+
+```bash
+./scripts/verify.sh
+```
+
+Runs everything end to end and prints a pass/fail summary: brings up the database, applies migrations, regenerates the JOOQ sources, builds, checks formatting, runs the tests, asserts the emitted bytecode target matches the Java version pinned in `../.mise.toml`, then starts the packaged application and exercises every endpoint against the live database — asserting response **bodies**, not just status codes.
+
+It needs Docker, and it starts the server on port `8080`; if something is already listening there it stops rather than testing whatever that is.
+
 ## Tests
 
 ```bash

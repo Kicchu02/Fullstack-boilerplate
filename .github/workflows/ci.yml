@@ -1,0 +1,77 @@
+name: CI
+
+# Runs on every pull request regardless of base branch, so the branch stack this project
+# uses (feature -> integration branch -> main) is covered without listing each one.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "narayana/**"
+
+# A new push supersedes the run in progress for the same ref. Without this, a quick series
+# of pushes queues several full backend runs, each spinning up Postgres.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Installs exactly the Node version pinned in .mise.toml, so CI cannot drift from
+      # what contributors run locally. Nothing here restates a version number.
+      - uses: jdx/mise-action@v4
+
+      - name: Cache npm downloads
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('FE/package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
+      # The same script contributors run. It does npm ci (which also verifies the lockfile
+      # is in step with package.json), the type-checked build, lint, the test suite, and
+      # then serves the production build and fetches every emitted chunk.
+      - name: Verify frontend
+        run: ./FE/scripts/verify.sh
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Installs the Java version pinned in .mise.toml. The verify script asserts that the
+      # bytecode it produces matches that same pin, so a drift between them fails the build.
+      - uses: jdx/mise-action@v4
+
+      - name: Cache Gradle
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('WS/gradle/wrapper/gradle-wrapper.properties', 'WS/gradle/libs.versions.toml', 'WS/build.gradle.kts') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      # Postgres is started by the script's own `docker compose up`, using the same
+      # docker-compose.yml as local development, rather than a `services:` block here.
+      # Two definitions of the database would be free to drift apart.
+      - name: Verify backend
+        run: ./WS/scripts/verify.sh
+
+      # The server log is the only place a boot failure is explained, and the script only
+      # tails it. Keep it when the job fails.
+      - name: Upload backend logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-logs
+          path: |
+            WS/build/verify.log
+            WS/build/verify-server.log
+          if-no-files-found: ignore

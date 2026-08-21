@@ -1,48 +1,50 @@
-import { Button, CircularProgress, Stack, Typography } from "@mui/material";
-import { observer } from "mobx-react-lite";
+import { Button, Card, Flex, Spin, Typography } from "antd";
+import type React from "react";
 import { useEffect } from "react";
 import { useNavigateHelper } from "../RoutesHelper";
-import { useHomePageStore } from "../stores/hooks";
+import { useHomePageStore } from "../stores/HomePageStore";
 
-export const HomePage = observer((): React.ReactElement => {
-  const homePageStore = useHomePageStore();
+export const HomePage = (): React.ReactElement => {
   const navigateHelper = useNavigateHelper();
+  const isLoading = useHomePageStore((s) => s.isLoading);
+  const dummyData = useHomePageStore((s) => s.dummyData);
+  const isSignOutLoading = useHomePageStore((s) => s.isSignOutLoading);
+  const dummyAPI = useHomePageStore((s) => s.dummyAPI);
+  const signOut = useHomePageStore((s) => s.signOut);
+  const reset = useHomePageStore((s) => s.reset);
 
+  // Zustand actions keep a stable identity for the life of the store, so depending on
+  // them here does not re-fire the effect. Depending on the store object itself would.
   useEffect(() => {
-    homePageStore.dummyAPI();
-    return homePageStore.reset;
-  }, [homePageStore]);
+    void dummyAPI();
+    return reset;
+  }, [dummyAPI, reset]);
 
   return (
-    <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
-      {homePageStore.isLoading ? (
-        <CircularProgress />
+    <Flex align="center" justify="center" style={{ height: "100%" }}>
+      {isLoading ? (
+        <Spin size="large" />
       ) : (
-        <Stack
-          sx={{
-            gap: 2,
-            alignItems: "center",
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 2,
-            p: 2,
-          }}
-        >
-          <Typography variant="subtitle1">{homePageStore.dummyData}</Typography>
-          <Button
-            variant="contained"
-            color="error"
-            loading={homePageStore.isSignOutLoading}
-            onClick={async () => {
-              await homePageStore.signOut();
-              homePageStore.reset();
-              navigateHelper.navigateToSignIn();
-            }}
-          >
-            Sign Out
-          </Button>
-        </Stack>
+        // Card replaces the hand-rolled bordered Stack: it already carries antd's border,
+        // radius and padding tokens, so the box follows the theme instead of hardcoding it.
+        <Card>
+          <Flex vertical gap={16} align="center">
+            <Typography.Text>{dummyData}</Typography.Text>
+            <Button
+              type="primary"
+              danger
+              loading={isSignOutLoading}
+              onClick={async () => {
+                await signOut();
+                reset();
+                navigateHelper.navigateToSignIn();
+              }}
+            >
+              Sign Out
+            </Button>
+          </Flex>
+        </Card>
       )}
-    </Stack>
+    </Flex>
   );
-});
+};

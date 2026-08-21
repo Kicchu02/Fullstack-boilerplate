@@ -23,7 +23,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.ktor)
     id("org.flywaydb.flyway") version "13.3.0"
-    id("nu.studer.jooq") version "8.2"
+    id("nu.studer.jooq") version "10.2.1"
     id("com.diffplug.spotless") version "8.10.0"
     alias(libs.plugins.kotlin.serialization)
 }
@@ -78,7 +78,7 @@ flyway {
 }
 
 jooq {
-    version.set("3.18.6")
+    version.set("3.21.7")
     configurations {
         create("main") {
             generateSchemaSourceOnCompilation.set(false)

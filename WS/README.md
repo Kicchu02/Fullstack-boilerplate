@@ -78,7 +78,24 @@ The server serves on `http://localhost:8080`.
 
 Stop the application from IntelliJ when you are done, then stop the database with one of the commands above.
 
-### 2. Build the Project
+### 2. Run from the Command Line
+
+Start the database first, then, from `WS/`:
+
+```bash
+./gradlew run
+```
+
+The server serves on `http://localhost:8080`. Stop it with `Ctrl+C`.
+
+To run the packaged build instead:
+
+```bash
+./gradlew installDist
+./build/install/ktor-sample/bin/ktor-sample configuration/application.conf
+```
+
+### 3. Build the Project
 
 ```bash
 ./gradlew build

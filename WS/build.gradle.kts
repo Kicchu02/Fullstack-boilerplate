@@ -53,10 +53,20 @@ kotlin {
 }
 
 application {
-    mainClass = "io.ktor.server.netty.EngineMain"
+    // com.example.ApplicationKt, not Ktor's EngineMain. Application.kt declares its own
+    // main() that builds the server with embeddedServer() and takes the HOCON config path
+    // as argv[0]; it deliberately does not go through Ktor's config-driven module loading.
+    mainClass = "com.example.ApplicationKt"
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+}
+
+// main() requires the config path as an argument, so supply it here — otherwise
+// `./gradlew run` fails on args.first(). Matches the program argument in
+// .run/ApplicationKt.run.xml, and is resolved relative to WS/.
+tasks.named<JavaExec>("run") {
+    args("configuration/application.conf")
 }
 
 repositories {
@@ -67,7 +77,6 @@ dependencies {
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.netty)
     implementation(libs.logback.classic)
-    implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.kotlin.test.junit5)

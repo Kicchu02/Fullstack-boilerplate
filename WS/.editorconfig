@@ -1,0 +1,31 @@
+# Formatting rules for this project, read by ktlint (via Spotless) and by IntelliJ.
+#
+# ktlint_code_style and max_line_length are pinned on purpose. ktlint changed its default
+# style in 1.0, so without these lines the formatting a clone gets depends on whichever
+# ktlint version Spotless happens to resolve. ktlint_official is ktlint's own recommended
+# style; the alternative, intellij_idea, additionally drops the trailing commas this
+# codebase uses.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{kt,kts}]
+ktlint_code_style = ktlint_official
+max_line_length = 140
+
+# Trailing commas stay allowed, so parameter lists that do wrap keep the diff-friendly
+# form. Set explicitly rather than inherited, so a future ktlint default cannot flip it.
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

@@ -31,9 +31,7 @@ export const NetworkingStore = types
       axios.interceptors.response.use(
         (response) => response,
         (error) => {
-          console.log("error", error.status);
           store.setErrorCode(error.status as number);
-          console.log("store.errorCode", store.errorCode);
           return Promise.reject(error);
         }
       );

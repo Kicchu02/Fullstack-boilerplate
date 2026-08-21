@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run lint` — ESLint (flat config)
 - `npm run preview` — preview production build
 
+- `./scripts/verify.sh` — the full frontend gate: `npm ci`, build, lint, tests, then the production build served and every emitted chunk fetched. Run this rather than the individual commands before claiming the frontend works. It refuses to run if port 3000 is already bound, because Vite silently falls back to another port and the checks would then hit the wrong server.
 - `npm test` — Vitest, single run; `npm run test:watch` — watch mode
 
 Tests are Vitest + React Testing Library in a `jsdom` environment, configured in the

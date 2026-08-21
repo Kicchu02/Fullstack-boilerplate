@@ -75,6 +75,12 @@ Each project is set up and run from its own README. Follow whichever one you are
 
 Working on both? `./bootstrap.sh` runs the backend database setup and the frontend dependency install in one go. You still need the IntelliJ steps in [`WS/README.md`](WS/README.md) to run the backend afterwards.
 
+## Verifying a change
+
+`./verify.sh` runs both projects' full verification suites and prints one summary per half. It needs Docker running, and it starts the backend on port `8080` and a preview server on port `3000`, so stop anything already using those ports first — the scripts refuse to run rather than test the wrong server.
+
+Each project can be verified on its own: [`WS/scripts/verify.sh`](WS/scripts/verify.sh) and [`FE/scripts/verify.sh`](FE/scripts/verify.sh).
+
 ## Project Structure
 
 - **[FE/](FE/README.md)** — React frontend application

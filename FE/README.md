@@ -57,6 +57,16 @@ npm test           # run the test suite once
 npm run test:watch # run the tests in watch mode
 ```
 
+## Verifying the whole frontend
+
+```bash
+./scripts/verify.sh
+```
+
+Runs `npm ci` (which is also the check that `package.json` and `package-lock.json` still agree), the type-checked production build, ESLint, the test suite, and then serves the build with `vite preview` and fetches every emitted JavaScript chunk. Prints a pass/fail summary.
+
+It uses port `3000`; if something is already listening there it stops rather than testing whatever that is — Vite would otherwise silently fall back to another port.
+
 ## Tests
 
 Tests run on [Vitest](https://vitest.dev/) in a `jsdom` environment, with

@@ -7,9 +7,8 @@ import { useUiStore } from "./UiStore";
 /**
  * Restores every store to its initial state.
  *
- * Zustand stores are module singletons, so unlike the MST tree they are not recreated per
- * render — which is the point, but it means state survives between tests unless something
- * clears it. Called from the Vitest setup file's afterEach.
+ * Zustand stores are module singletons rather than per-render instances, so state survives
+ * between tests unless something clears it. Called from the Vitest setup file's afterEach.
  */
 export const resetAllStores = (): void => {
   useUiStore.getState().reset();

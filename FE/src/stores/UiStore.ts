@@ -18,9 +18,8 @@ type UiActions = {
   reset: () => void;
 };
 
-// Held separately from the initialiser so reset() has something to restore. Under MST this
-// was a `.volatile` snapshot captured in `afterCreate`; a plain frozen object does the same
-// job without needing a lifecycle hook.
+// Held separately from the store body so reset() has something to restore. Every store in
+// this directory follows the same shape.
 const initialState: UiState = {
   showFeatureInDevPopup: false,
   isPopupOpen: false,
@@ -58,9 +57,8 @@ export const useUiStore = create<UiState & UiActions>()((set) => ({
 }));
 
 /**
- * Show a transient message. Callable from anywhere — including outside React — because
- * the store is reachable without a provider. Under MST this needed a node to walk up from
- * via getRoot(), which is why the old signature took a store as its first argument.
+ * Show a transient message. Callable from anywhere, including outside React, because the
+ * store is reachable without a provider.
  */
 export const showPopup = (message: string, variant: PopupVariant): void => {
   const { setPopupMessage, setPopupVariant, setIsPopupOpen } = useUiStore.getState();

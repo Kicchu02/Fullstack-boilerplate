@@ -38,9 +38,8 @@ export const selectIsUnauthorized = (s: NetworkingState): boolean =>
 export const selectIsAPIErrored = (s: NetworkingState): boolean =>
   s.errorCode === 500;
 
-// Installed once, when this module is first imported. Under MST this ran in the store's
-// `afterCreate`, which meant a new interceptor was registered every time a root store was
-// created — once per app start in production, but once per render in tests.
+// Installed once, when this module is first imported. Keep it at module scope: moving it
+// into a component or an effect would register a fresh interceptor on every mount.
 axios.interceptors.response.use(
   (response) => response,
   (error) => {

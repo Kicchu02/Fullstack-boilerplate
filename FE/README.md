@@ -1,6 +1,10 @@
 # React Sample Project
 
-This is a React + TypeScript + Vite project with routing and state management.
+This is a React + TypeScript + Vite project.
+
+**Stack:** React 19, TypeScript, Vite 8, [Ant Design](https://ant.design/) v6 for UI,
+[Zustand](https://zustand.docs.pmnd.rs/) for state, React Router for routing, axios for
+HTTP, and Vitest + React Testing Library for tests.
 
 This project is worked on standalone — everything you need to set it up and run it is in this README.
 

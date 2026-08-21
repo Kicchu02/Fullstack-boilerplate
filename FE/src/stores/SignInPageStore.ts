@@ -74,9 +74,9 @@ export const useSignInPageStore = create<SignInState & SignInActions>()(
   }),
 );
 
-// Derived state. These were MST `.views` getters; as selectors they stay out of the stored
-// state and each returns a primitive, so a component subscribing to one only re-renders
-// when that boolean actually flips.
+// Derived state as selectors rather than stored fields: it cannot go stale, and each
+// returns a primitive, so a component subscribing to one only re-renders when that
+// boolean actually flips.
 export const selectIsButtonDisabled = (s: SignInState): boolean =>
   s.email.trim() === EMPTY_STRING || s.password.trim() === EMPTY_STRING;
 

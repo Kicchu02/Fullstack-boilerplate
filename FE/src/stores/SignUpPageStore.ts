@@ -11,6 +11,8 @@ type SignUpState = {
   isEmailAlreadyExists: boolean;
   isEmailInvalid: boolean;
   isPasswordInvalid: boolean;
+  /** Any failure the specific field flags above do not describe. */
+  hasRequestFailed: boolean;
 };
 
 type SignUpActions = {
@@ -27,6 +29,7 @@ const initialState: SignUpState = {
   isEmailAlreadyExists: false,
   isEmailInvalid: false,
   isPasswordInvalid: false,
+  hasRequestFailed: false,
 };
 
 export const useSignUpPageStore = create<SignUpState & SignUpActions>()(
@@ -42,6 +45,7 @@ export const useSignUpPageStore = create<SignUpState & SignUpActions>()(
         isEmailAlreadyExists: false,
         isEmailInvalid: false,
         isPasswordInvalid: false,
+        hasRequestFailed: false,
       });
       try {
         await postAPI(Endpoints.SIGN_UP, {
@@ -49,6 +53,9 @@ export const useSignUpPageStore = create<SignUpState & SignUpActions>()(
           password: get().password,
         });
       } catch (e) {
+        // Set unconditionally: any throw means the request did not succeed, so the caller
+        // must not report success. The specific flags below only add detail on top.
+        set({ hasRequestFailed: true });
         const error = e as AxiosError;
         if (error.response) {
           const { status, data } = error.response;
@@ -76,4 +83,4 @@ export const selectIsButtonDisabled = (s: SignUpState): boolean =>
   s.email.trim() === EMPTY_STRING || s.password.trim() === EMPTY_STRING;
 
 export const selectIsAPIErrored = (s: SignUpState): boolean =>
-  s.isEmailAlreadyExists || s.isEmailInvalid || s.isPasswordInvalid;
+  s.isEmailAlreadyExists || s.isEmailInvalid || s.isPasswordInvalid || s.hasRequestFailed;

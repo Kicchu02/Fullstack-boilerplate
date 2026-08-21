@@ -10,6 +10,8 @@ type SignInState = {
   isLoading: boolean;
   isEmailInvalid: boolean;
   isPasswordInvalid: boolean;
+  /** Any failure the specific field flags above do not describe. */
+  hasRequestFailed: boolean;
 };
 
 type SignInActions = {
@@ -25,6 +27,7 @@ const initialState: SignInState = {
   isLoading: false,
   isEmailInvalid: false,
   isPasswordInvalid: false,
+  hasRequestFailed: false,
 };
 
 export const useSignInPageStore = create<SignInState & SignInActions>()(
@@ -35,7 +38,9 @@ export const useSignInPageStore = create<SignInState & SignInActions>()(
     reset: () => set(initialState),
 
     signIn: async () => {
-      set({ isLoading: true, isEmailInvalid: false, isPasswordInvalid: false });
+      set({ isLoading: true, isEmailInvalid: false, isPasswordInvalid: false,
+        hasRequestFailed: false,
+      });
       try {
         const response = await postAPI(Endpoints.SIGN_IN, {
           emailId: { emailId: get().email },
@@ -43,6 +48,9 @@ export const useSignInPageStore = create<SignInState & SignInActions>()(
         });
         localStorage.setItem(WEB_TOKEN_COOKIE_NAME, response.data.webToken);
       } catch (e) {
+        // Set unconditionally: any throw means the request did not succeed, so the caller
+        // must not report success. The specific flags below only add detail on top.
+        set({ hasRequestFailed: true });
         const error = e as AxiosError;
         if (error.response) {
           const { status, data } = error.response;
@@ -73,4 +81,4 @@ export const selectIsButtonDisabled = (s: SignInState): boolean =>
   s.email.trim() === EMPTY_STRING || s.password.trim() === EMPTY_STRING;
 
 export const selectIsAPIErrored = (s: SignInState): boolean =>
-  s.isEmailInvalid || s.isPasswordInvalid;
+  s.isEmailInvalid || s.isPasswordInvalid || s.hasRequestFailed;

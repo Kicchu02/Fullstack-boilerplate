@@ -9,7 +9,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run lint` — ESLint (flat config)
 - `npm run preview` — preview production build
 
-No test framework/script is configured. This frontend talks to the WS backend at `http://localhost:8080` (see `src/constants.ts`'s `BASE_URL`) — see `../WS/CLAUDE.md` to run it.
+- `npm test` — Vitest, single run; `npm run test:watch` — watch mode
+
+Tests are Vitest + React Testing Library in a `jsdom` environment, configured in the
+`test` block of `vite.config.ts` (note `defineConfig` is imported from `vitest/config`,
+not `vite`, or `tsc -b` rejects that block). `globals: false`, so `describe`/`it`/`expect`
+are imported explicitly — which also means Testing Library's automatic cleanup does not
+register itself and is wired up by hand in `src/test/setup.ts`. Drop that `afterEach(cleanup)`
+and every render accumulates in the same document, and queries start failing with "found
+multiple elements". `src/test/renderWithProviders.tsx` wraps a component in
+`RootStoreProvider` plus a `MemoryRouter`; pages need both, since they reach state through
+`useRootStore()` and navigate through `useNavigateHelper()`.
+
+This frontend talks to the WS backend at `http://localhost:8080` (see `src/constants.ts`'s `BASE_URL`) — see `../WS/CLAUDE.md` to run it. The tests do not need it running.
 
 ## Architecture
 

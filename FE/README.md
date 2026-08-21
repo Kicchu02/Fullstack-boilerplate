@@ -46,7 +46,20 @@ Stop the development server with `Ctrl+C`.
 ## Other Commands
 
 ```bash
-npm run build     # type-check and build for production into dist/
-npm run lint      # run ESLint
-npm run preview   # serve the production build
+npm run build      # type-check and build for production into dist/
+npm run lint       # run ESLint
+npm run preview    # serve the production build
+npm test           # run the test suite once
+npm run test:watch # run the tests in watch mode
 ```
+
+## Tests
+
+Tests run on [Vitest](https://vitest.dev/) in a `jsdom` environment, with
+[React Testing Library](https://testing-library.com/react) for the component tests. They
+need no backend and no database — API calls are mocked.
+
+Test files live next to the code they cover, as `*.test.ts` / `*.test.tsx`. Shared test
+setup is in `src/test/`: `setup.ts` registers the `jest-dom` matchers and Testing Library
+cleanup, and `renderWithProviders.tsx` wraps a component in the MST root store and a
+router, which is what pages need in order to render at all.

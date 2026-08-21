@@ -38,7 +38,7 @@ export const App = observer((): React.ReactElement => {
   }, [navigateHelper, networkingStore]);
 
   return (
-    <Stack height="100%">
+    <Stack sx={{ height: "100%" }}>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={rootStore.showFeatureInDevPopup}
